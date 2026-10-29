@@ -775,3 +775,41 @@ pub async fn agent_overview(State(st): State<AppState>) -> ApiResult<Json<crate:
     let overview = st.rulebook.overview(&ctx).await;
     Ok(Json(overview))
 }
+
+#[derive(Debug, Deserialize, Default)]
+pub struct SynthesizeReq {
+    pub context: Option<String>,
+}
+
+pub async fn agent_synthesize_rule(
+    State(st): State<AppState>,
+    body: Option<Json<SynthesizeReq>>,
+) -> ApiResult<Json<crate::agent::Rule>> {
+    let ctx = body.and_then(|b| b.context.clone());
+    let rule = st.rulebook.synthesize_rule(ctx.as_deref()).await;
+    let _ = repos::events::record_system_event(
+        &st.db,
+        crate::domain::SystemLevel::Info,
+        "agent",
+        &format!("Synthesized autonomous rule #{}: {}", rule.id, rule.title),
+        None,
+    )
+    .await;
+    Ok(Json(rule))
+}
+
+pub async fn agent_reset_rules(
+    State(st): State<AppState>,
+) -> ApiResult<Json<serde_json::Value>> {
+    st.rulebook.reset_rules().await;
+    let _ = repos::events::record_system_event(
+        &st.db,
+        crate::domain::SystemLevel::Info,
+        "agent",
+        "Autonomous rulebook reset to baseline rules",
+        None,
+    )
+    .await;
+    Ok(Json(serde_json::json!({ "reset": true })))
+}
+

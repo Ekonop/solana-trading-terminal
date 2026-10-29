@@ -143,6 +143,14 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  Future<void> synthesizeAgentRule([String? context]) async {
+    await withCall(() => api.agentSynthesizeRule(context));
+  }
+
+  Future<void> resetAgentRules() async {
+    await withCall(() => api.agentResetRules());
+  }
+
   void _onWs(WsEvent e) {
     switch (e.kind) {
       case 'health':

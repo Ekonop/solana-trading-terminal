@@ -169,6 +169,12 @@ class ApiClient {
 
   Future<Map<String, dynamic>> agentOverview() => _get('/api/v1/agent/overview');
 
+  Future<Map<String, dynamic>> agentSynthesizeRule([String? context]) =>
+      _post('/api/v1/agent/synthesize', context != null ? {'context': context} : {});
+
+  Future<Map<String, dynamic>> agentResetRules() =>
+      _post('/api/v1/agent/reset-rules');
+
   Future<List<Map<String, dynamic>>> riskEvents() async {
     final d = await _get('/api/v1/risk/events');
     final list = d['items'];

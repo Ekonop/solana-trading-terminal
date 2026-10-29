@@ -61,6 +61,8 @@ pub fn router(state: AppState) -> Router {
         .route("/api/v1/export/risk-events", get(exports::export_risk_events))
         .route("/api/v1/export/system-events", get(exports::export_system_events))
         .route("/api/v1/agent/overview", get(handlers::agent_overview))
+        .route("/api/v1/agent/synthesize", post(handlers::agent_synthesize_rule))
+        .route("/api/v1/agent/reset-rules", post(handlers::agent_reset_rules))
         .route("/api/v1/stop-all", post(handlers::stop_all))
         .route("/api/v1/real/status", get(real_handlers::real_status))
         .route("/api/v1/real/arm", post(real_handlers::real_arm))

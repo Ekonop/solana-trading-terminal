@@ -68,9 +68,6 @@ class _AgentBotScreenState extends State<AgentBotScreen> {
   Timer? _toastTimer;
   String? _lastFillId;
 
-  // Local simulated rule additions for live user exploration
-  final List<AgentRule> _extraRules = [];
-
   @override
   void initState() {
     super.initState();
@@ -117,36 +114,57 @@ class _AgentBotScreenState extends State<AgentBotScreen> {
     });
   }
 
-  void _synthesizeNewRule() {
-    final agent = widget.state.agentOverview;
-    final newId = (agent?.rules.length ?? 15) + _extraRules.length + 1;
-    final r = AgentRule(
-      id: newId,
-      title: 'Exit if bid-ask spread widens > 1.2%',
-      provenance: 'Whale Tail · from live market telemetry',
-      isNew: true,
-      actionType: 'exits',
-      count: 0,
-      color: 'purple',
-    );
-    setState(() {
-      _extraRules.insert(0, r);
-    });
-    _showToast(_EventToastData(
-      title: 'New Rule Synthesized #$newId',
-      subtitle: 'Exit if bid-ask spread widens > 1.2%',
-      result: 'NEW',
-      resultColor: _GrokColors.purple,
-      icon: Icons.auto_awesome_rounded,
-    ));
+  Future<void> _synthesizeNewRule() async {
+    try {
+      await widget.state.synthesizeAgentRule('live market telemetry');
+      final newRule = widget.state.agentOverview?.rules.firstOrNull;
+      if (newRule != null) {
+        _showToast(_EventToastData(
+          title: 'Rule Synthesized #${newRule.id}',
+          subtitle: newRule.title,
+          result: 'ACTIVE',
+          resultColor: _GrokColors.purple,
+          icon: Icons.auto_awesome_rounded,
+        ));
+      }
+    } catch (e) {
+      _showToast(_EventToastData(
+        title: 'Synthesis Failed',
+        subtitle: e.toString(),
+        result: 'ERR',
+        resultColor: _GrokColors.negative,
+        icon: Icons.error_outline_rounded,
+      ));
+    }
+  }
+
+  Future<void> _resetRules() async {
+    try {
+      await widget.state.resetAgentRules();
+      _showToast(const _EventToastData(
+        title: 'Rulebook Reset',
+        subtitle: 'Reverted to baseline rules',
+        result: 'RESET',
+        resultColor: _GrokColors.blue,
+        icon: Icons.restart_alt_rounded,
+      ));
+    } catch (e) {
+      _showToast(_EventToastData(
+        title: 'Reset Failed',
+        subtitle: e.toString(),
+        result: 'ERR',
+        resultColor: _GrokColors.negative,
+        icon: Icons.error_outline_rounded,
+      ));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final state = widget.state;
-    final baseAgent = state.agentOverview;
+    final agent = state.agentOverview;
 
-    if (baseAgent == null) {
+    if (agent == null) {
       return Container(
         color: _GrokColors.page,
         alignment: Alignment.center,
@@ -169,30 +187,6 @@ class _AgentBotScreenState extends State<AgentBotScreen> {
         ),
       );
     }
-
-    // Merge any dynamically user-synthesized rules on top of real engine rules
-    final allRules = [..._extraRules, ...baseAgent.rules];
-    final agent = AgentOverview(
-      name: baseAgent.name,
-      tagline: baseAgent.tagline,
-      status: baseAgent.status,
-      agentCount: baseAgent.agentCount,
-      startedEquityUsd: baseAgent.startedEquityUsd,
-      currentEquityUsd: baseAgent.currentEquityUsd,
-      multiplier: baseAgent.multiplier,
-      profitUsd: baseAgent.profitUsd,
-      profitPct: baseAgent.profitPct,
-      streak: baseAgent.streak,
-      totalTrades: baseAgent.totalTrades,
-      winRatePct: baseAgent.winRatePct,
-      goalLabel: baseAgent.goalLabel,
-      goalStatus: baseAgent.goalStatus,
-      rulesStarted: baseAgent.rulesStarted,
-      rulesNow: allRules.length,
-      rules: allRules,
-      decisions: baseAgent.decisions,
-      milestones: baseAgent.milestones,
-    );
 
     return Container(
       color: _GrokColors.page,
@@ -1053,7 +1047,18 @@ class _AgentBotScreenState extends State<AgentBotScreen> {
         OutlinedButton.icon(
           onPressed: _synthesizeNewRule,
           icon: const Icon(Icons.auto_awesome_rounded, size: 15),
-          label: const Text('Simulate New Rule', style: TextStyle(fontFamily: 'FiraSans', fontSize: 12)),
+          label: const Text('Synthesize Rule', style: TextStyle(fontFamily: 'FiraSans', fontSize: 12)),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: _GrokColors.textPrimary,
+            side: const BorderSide(color: _GrokColors.border),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        ),
+        const SizedBox(width: 12),
+        OutlinedButton.icon(
+          onPressed: _resetRules,
+          icon: const Icon(Icons.restart_alt_rounded, size: 15),
+          label: const Text('Reset Rules', style: TextStyle(fontFamily: 'FiraSans', fontSize: 12)),
           style: OutlinedButton.styleFrom(
             foregroundColor: _GrokColors.textPrimary,
             side: const BorderSide(color: _GrokColors.border),
