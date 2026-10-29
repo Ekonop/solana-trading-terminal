@@ -150,4 +150,73 @@ void main() {
       expect(s.samplePoints, 9);
     });
   });
+
+  group('AgentOverview.fromJson', () {
+    test('parses rulebook, decisions, and milestones', () {
+      final agent = AgentOverview.fromJson({
+        'name': 'Grok Bot',
+        'tagline': 'Rulebook · it writes its own rules',
+        'status': 'Learning',
+        'agent_count': 5,
+        'started_equity_usd': 2324.0,
+        'current_equity_usd': 6661.22,
+        'multiplier': 2.88,
+        'profit_usd': 4337.22,
+        'profit_pct': 186.6,
+        'streak': 13,
+        'total_trades': 20,
+        'win_rate_pct': 90.0,
+        'goal_label': 'Goal: 2x',
+        'goal_status': '✓ Done · 2.88x now',
+        'rules_started': 3,
+        'rules_now': 15,
+        'rules': [
+          {
+            'id': 15,
+            'title': 'Exit if volume drops 50% in 30s',
+            'provenance': 'Whale Tail · from \$CHILLGUY +38%',
+            'is-new': true,
+            'action-type': 'exits',
+            'count': 0,
+            'color': 'purple',
+          }
+        ],
+        'decisions': [
+          {
+            'id': 'dec-met',
+            'symbol': '\$MET',
+            'name': 'Meteora',
+            'strategy': 'Dip Hunter',
+            'rules-passed': 15,
+            'rules-total': 15,
+            'status': 'open',
+            'detail': 'Dip Hunter in · 16.5 SOL',
+            'size-sol': 16.5,
+            'pnl-pct': 11.5,
+            'is-win': true,
+            'evaluated-at': 1730000000,
+          }
+        ],
+        'milestones': [
+          {
+            'label': '2x',
+            'multiplier': 2.0,
+            'reached': true,
+            'is-current-target': false,
+          }
+        ],
+      });
+
+      expect(agent.name, 'Grok Bot');
+      expect(agent.multiplier, 2.88);
+      expect(agent.streak, 13);
+      expect(agent.rules.length, 1);
+      expect(agent.rules.first.id, 15);
+      expect(agent.rules.first.isNew, isTrue);
+      expect(agent.decisions.length, 1);
+      expect(agent.decisions.first.symbol, '\$MET');
+      expect(agent.milestones.length, 1);
+      expect(agent.milestones.first.reached, isTrue);
+    });
+  });
 }

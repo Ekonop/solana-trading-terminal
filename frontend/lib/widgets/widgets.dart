@@ -26,6 +26,14 @@ class TermPanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: T.panel,
         borderRadius: BorderRadius.circular(T.radius),
+        border: Border.all(color: T.hairline, width: 0.8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.035),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -115,6 +123,14 @@ class KpiCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: T.panel,
         borderRadius: BorderRadius.circular(T.radius),
+        border: Border.all(color: T.hairline, width: 0.8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.035),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

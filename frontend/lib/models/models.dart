@@ -436,6 +436,185 @@ class WsEvent {
       );
 }
 
+/// A dynamic heuristic rule generated or modified by the autonomous agent.
+class AgentRule {
+  final int id;
+  final String title;
+  final String provenance;
+  final bool isNew;
+  final String actionType; // "blocked", "trades", "exits"
+  final int count;
+  final String color;
+
+  AgentRule({
+    required this.id,
+    required this.title,
+    required this.provenance,
+    required this.isNew,
+    required this.actionType,
+    required this.count,
+    required this.color,
+  });
+
+  factory AgentRule.fromJson(Map<String, dynamic> m) => AgentRule(
+        id: JsonHelpers.i(m, ['id']),
+        title: JsonHelpers.s(m, ['title']),
+        provenance: JsonHelpers.s(m, ['provenance']),
+        isNew: JsonHelpers.b(m, ['is-new', 'is_new']),
+        actionType: JsonHelpers.s(m, ['action-type', 'action_type']),
+        count: JsonHelpers.i(m, ['count']),
+        color: JsonHelpers.s(m, ['color'], 'blue'),
+      );
+}
+
+/// A live coin evaluation against the dynamic rulebook.
+class CoinDecision {
+  final String id;
+  final String symbol;
+  final String name;
+  final String strategy;
+  final int rulesPassed;
+  final int rulesTotal;
+  final String status; // "open", "skip", "exited"
+  final String detail;
+  final double sizeSol;
+  final double pnlPct;
+  final bool isWin;
+  final int evaluatedAt;
+
+  CoinDecision({
+    required this.id,
+    required this.symbol,
+    required this.name,
+    required this.strategy,
+    required this.rulesPassed,
+    required this.rulesTotal,
+    required this.status,
+    required this.detail,
+    required this.sizeSol,
+    required this.pnlPct,
+    required this.isWin,
+    required this.evaluatedAt,
+  });
+
+  factory CoinDecision.fromJson(Map<String, dynamic> m) => CoinDecision(
+        id: JsonHelpers.s(m, ['id']),
+        symbol: JsonHelpers.s(m, ['symbol']),
+        name: JsonHelpers.s(m, ['name']),
+        strategy: JsonHelpers.s(m, ['strategy']),
+        rulesPassed: JsonHelpers.i(m, ['rules-passed', 'rules_passed']),
+        rulesTotal: JsonHelpers.i(m, ['rules-total', 'rules_total']),
+        status: JsonHelpers.s(m, ['status']),
+        detail: JsonHelpers.s(m, ['detail']),
+        sizeSol: JsonHelpers.d(m, ['size-sol', 'size_sol']),
+        pnlPct: JsonHelpers.d(m, ['pnl-pct', 'pnl_pct']),
+        isWin: JsonHelpers.b(m, ['is-win', 'is_win']),
+        evaluatedAt: JsonHelpers.i(m, ['evaluated-at', 'evaluated_at']),
+      );
+}
+
+/// A milestone in the bot's multiplier journey.
+class GoalMilestone {
+  final String label;
+  final double multiplier;
+  final bool reached;
+  final bool isCurrentTarget;
+
+  GoalMilestone({
+    required this.label,
+    required this.multiplier,
+    required this.reached,
+    required this.isCurrentTarget,
+  });
+
+  factory GoalMilestone.fromJson(Map<String, dynamic> m) => GoalMilestone(
+        label: JsonHelpers.s(m, ['label']),
+        multiplier: JsonHelpers.d(m, ['multiplier']),
+        reached: JsonHelpers.b(m, ['reached']),
+        isCurrentTarget: JsonHelpers.b(m, ['is-current-target', 'is_current_target']),
+      );
+}
+
+/// Full Agent Bot state snapshot.
+class AgentOverview {
+  final String name;
+  final String tagline;
+  final String status;
+  final int agentCount;
+  final double startedEquityUsd;
+  final double currentEquityUsd;
+  final double multiplier;
+  final double profitUsd;
+  final double profitPct;
+  final int streak;
+  final int totalTrades;
+  final double winRatePct;
+  final String goalLabel;
+  final String goalStatus;
+  final int rulesStarted;
+  final int rulesNow;
+  final List<AgentRule> rules;
+  final List<CoinDecision> decisions;
+  final List<GoalMilestone> milestones;
+
+  AgentOverview({
+    required this.name,
+    required this.tagline,
+    required this.status,
+    required this.agentCount,
+    required this.startedEquityUsd,
+    required this.currentEquityUsd,
+    required this.multiplier,
+    required this.profitUsd,
+    required this.profitPct,
+    required this.streak,
+    required this.totalTrades,
+    required this.winRatePct,
+    required this.goalLabel,
+    required this.goalStatus,
+    required this.rulesStarted,
+    required this.rulesNow,
+    required this.rules,
+    required this.decisions,
+    required this.milestones,
+  });
+
+  factory AgentOverview.fromJson(Map<String, dynamic> m) {
+    final rulesRaw = JsonHelpers.pick(m, ['rules']);
+    final decisionsRaw = JsonHelpers.pick(m, ['decisions']);
+    final milestonesRaw = JsonHelpers.pick(m, ['milestones']);
+
+    return AgentOverview(
+      name: JsonHelpers.s(m, ['name'], 'Grok Bot'),
+      tagline: JsonHelpers.s(m, ['tagline'], 'Rulebook · it writes its own rules'),
+      status: JsonHelpers.s(m, ['status'], 'Learning'),
+      agentCount: JsonHelpers.i(m, ['agent-count', 'agent_count'], 5),
+      startedEquityUsd: JsonHelpers.d(m, ['started-equity-usd', 'started_equity_usd'], 2324.0),
+      currentEquityUsd: JsonHelpers.d(m, ['current-equity-usd', 'current_equity_usd']),
+      multiplier: JsonHelpers.d(m, ['multiplier'], 1.0),
+      profitUsd: JsonHelpers.d(m, ['profit-usd', 'profit_usd']),
+      profitPct: JsonHelpers.d(m, ['profit-pct', 'profit_pct']),
+      streak: JsonHelpers.i(m, ['streak']),
+      totalTrades: JsonHelpers.i(m, ['total-trades', 'total_trades']),
+      winRatePct: JsonHelpers.d(m, ['win-rate-pct', 'win_rate_pct']),
+      goalLabel: JsonHelpers.s(m, ['goal-label', 'goal_label'], 'Goal: 2x'),
+      goalStatus: JsonHelpers.s(m, ['goal-status', 'goal_status']),
+      rulesStarted: JsonHelpers.i(m, ['rules-started', 'rules_started'], 3),
+      rulesNow: JsonHelpers.i(m, ['rules-now', 'rules_now']),
+      rules: rulesRaw is List
+          ? rulesRaw.map((e) => AgentRule.fromJson(JsonHelpers.asMap(e))).toList()
+          : <AgentRule>[],
+      decisions: decisionsRaw is List
+          ? decisionsRaw.map((e) => CoinDecision.fromJson(JsonHelpers.asMap(e))).toList()
+          : <CoinDecision>[],
+      milestones: milestonesRaw is List
+          ? milestonesRaw.map((e) => GoalMilestone.fromJson(JsonHelpers.asMap(e))).toList()
+          : <GoalMilestone>[],
+    );
+  }
+}
+
+
 extension LetX<T> on T {
   R let<R>(R Function(T) f) => f(this);
 }

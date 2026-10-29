@@ -12,6 +12,7 @@ pub mod secrets;
 
 pub mod api;
 pub mod app;
+pub mod agent;
 pub mod events;
 pub mod market_data;
 pub mod real;

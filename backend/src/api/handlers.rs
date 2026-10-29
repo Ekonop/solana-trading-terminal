@@ -748,3 +748,30 @@ pub async fn reset_demo_data(
     .await?;
     Ok(Json(serde_json::json!({ "reset": true })))
 }
+
+pub async fn agent_overview(State(st): State<AppState>) -> ApiResult<Json<crate::agent::AgentOverview>> {
+    let account = repos::accounts::get_account(&st.db, &st.account_id).await?;
+    let positions = repos::trading::list_positions(&st.db, &st.account_id).await?;
+    let fills = repos::trading::list_fills(&st.db, &st.account_id, crate::repos::Page::new(Some(100), None)).await?.items;
+    let signals = repos::strategies::list_signals(&st.db, None, crate::repos::Page::new(Some(50), None)).await?.items;
+    let risk_events = repos::events::latest_risk_events(&st.db, 50).await?;
+    let snaps = st.cache.latest_all().await;
+    let marks = crate::trading::portfolio::marks_from_snapshots(&snaps, &st.sol_mint);
+    let val = crate::trading::portfolio::equity(&account, &positions, &marks);
+    let sol_price = marks.price_of(&st.sol_mint).unwrap_or(Decimal::from(150));
+    let starting_equity_usd = lamports_to_usd(account.initial_balance_lamports, sol_price);
+
+    let ctx = crate::agent::RealTelemetryContext {
+        starting_equity_usd,
+        current_equity_usd: val.equity_usd,
+        positions: &positions,
+        fills: &fills,
+        signals: &signals,
+        risk_events: &risk_events,
+        snapshots: &snaps,
+        sol_price,
+    };
+
+    let overview = st.rulebook.overview(&ctx).await;
+    Ok(Json(overview))
+}

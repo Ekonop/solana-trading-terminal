@@ -42,6 +42,7 @@ class AppState extends ChangeNotifier {
   List<PositionView> positions = [];
   List<BacktestRun> backtests = [];
   List<RiskEventView> riskEvents = [];
+  AgentOverview? agentOverview;
 
   // --- convenience accessors -------------------------------------------------
   List<EquitySnapshot> get equitySeries {
@@ -101,6 +102,7 @@ class AppState extends ChangeNotifier {
         api.backtests(),
         api.settings(),
         api.status(),
+        api.agentOverview(),
       ], eagerError: false);
       // All coercion below is defensive: a malformed answer for ONE endpoint
       // degrades to an empty collection instead of crashing the whole refresh
@@ -114,6 +116,10 @@ class AppState extends ChangeNotifier {
       backtests = JsonHelpers.asMapList(results[6]).map(BacktestRun.fromJson).toList();
       settingsJson = JsonHelpers.asMap(results[7]);
       statusJson = JsonHelpers.asMap(results[8]);
+      final agentRaw = JsonHelpers.asMap(results[9]);
+      if (agentRaw.isNotEmpty) {
+        agentOverview = AgentOverview.fromJson(agentRaw);
+      }
       backendUp = true;
       lastError = null;
       lastSync = DateTime.now();

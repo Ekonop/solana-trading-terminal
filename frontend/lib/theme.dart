@@ -3,30 +3,29 @@ import 'package:flutter/material.dart';
 /// DESIGN.md §2 — colors. Softened revision:
 /// warmer near-blacks, gentler layering, desaturated accent, radius everywhere.
 class T {
-  // Soft dark: muted plum-charcoal surfaces, desaturated lavender accent,
-  // gentle pastel semantics. Calm at night, no glow.
-  static const bg = Color(0xFF131218); // deep soft plum-black
-  static const bgSidebar = Color(0xFF0F0E14);
-  static const panel = Color(0xFF1A1921); // raised surface
-  static const panel2 = Color(0xFF23212C); // interactive surface
-  static const input = Color(0xFF17161D);
-  static const hairline = Color(0xFF2B2936); // barely-there stroke
-  static const hairlineStrong = Color(0xFF3A3748);
-  static const fg = Color(0xFFECEAF3);
-  static const fg2 = Color(0xFFB3AFC0);
-  static const fg3 = Color(0xFF736F80);
-  static const fg4 = Color(0xFF3B3847);
-  static const accent = Color(0xFFB9A1F0); // soft lavender, less neon
-  static const accentStrong = Color(0xFF9C82E0);
-  static const up = Color(0xFF93D7AC); // soft sage green
-  static const down = Color(0xFFF0A9A4); // dusty rose
-  static const warn = Color(0xFFE6C98F); // soft honey
-  static const info = Color(0xFFA2B9E8); // pale periwinkle
-  static const gold = Color(0xFFE2C792);
+  // Agent Bot Design System (design.md)
+  static const bg = Color(0xFFF5F5F7); // clean cool off-white page background
+  static const bgSidebar = Color(0xFFFFFFFF); // crisp white sidebar
+  static const panel = Color(0xFFFFFFFF); // crisp white card surface
+  static const panel2 = Color(0xFFF7F7FA); // interactive subtle surface
+  static const input = Color(0xFFEEEEF2); // input surface
+  static const hairline = Color(0xFFE8E8EC); // soft card border and subtle divider
+  static const hairlineStrong = Color(0xFFD6D6DC);
+  static const fg = Color(0xFF171719); // bold high-contrast text-primary
+  static const fg2 = Color(0xFF585862); // readable text-secondary
+  static const fg3 = Color(0xFF85858D); // muted text-secondary / captions
+  static const fg4 = Color(0xFFA8A8AF); // disabled text-muted
+  static const accent = Color(0xFF2788E8); // bright goal blue
+  static const accentStrong = Color(0xFF1B6BC0);
+  static const up = Color(0xFF32C66A); // positive green from design.md
+  static const down = Color(0xFFE66B79); // negative rose/red from design.md
+  static const warn = Color(0xFFF2A52B); // orange from design.md
+  static const info = Color(0xFF2788E8); // blue
+  static const gold = Color(0xFFF2A52B); // orange / gold
 
-  // Soft geometry
-  static const radius = 12.0; // panels / big surfaces
-  static const radiusSm = 9.0; // buttons / inputs / chips
+  // Geometry
+  static const radius = 20.0; // card radius from design.md §14: 20px
+  static const radiusSm = 10.0; // buttons / inputs / chips
   static const radiusXs = 6.0; // tiny accents
 
   static const mono = 'HackMono';
@@ -35,18 +34,18 @@ class T {
   static Color networkColor(String network) {
     switch (network.toLowerCase()) {
       case 'solana':
-        return const Color(0xFFB9A1F0); // soft lavender / purple
+        return const Color(0xFF9D5BE8); // purple from design.md
       case 'ethereum':
-        return const Color(0xFFA2B9E8); // soft periwinkle
+        return const Color(0xFF2788E8); // blue from design.md
       case 'base':
-        return const Color(0xFF70A5F5); // base blue
+        return const Color(0xFF0052FF); // base blue
       case 'arbitrum':
-        return const Color(0xFF78C3F5); // arbitrum cyan
+        return const Color(0xFF28A0F0); // arbitrum cyan
       case 'bsc':
       case 'binance':
-        return const Color(0xFFE6C98F); // bsc soft gold
+        return const Color(0xFFF2A52B); // orange / gold
       default:
-        return const Color(0xFF9E9AA8);
+        return const Color(0xFF85858D);
     }
   }
 }
@@ -61,16 +60,16 @@ class Type {
     color: T.fg3,
   );
   static const panelTitle = TextStyle(
-    fontFamily: T.mono,
-    fontSize: 11.5,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0.16,
+    fontFamily: T.sans,
+    fontSize: 13,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0.2,
     color: T.fg,
   );
   static const hero = TextStyle(
     fontFamily: T.mono,
     fontSize: 22,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w700,
     color: T.fg,
   );
   static const data = TextStyle(
@@ -117,20 +116,20 @@ class StatusTone {
   StatusTone(this.state);
 }
 
-/// Full app theme — soft dark terminal.
+/// Full app theme — Grok Bot telemetry design system.
 ThemeData buildTheme() {
   final base = ThemeData(
-    brightness: Brightness.dark,
+    brightness: Brightness.light,
     useMaterial3: true,
     scaffoldBackgroundColor: T.bg,
     fontFamily: T.sans,
-    colorScheme: const ColorScheme.dark(
+    colorScheme: const ColorScheme.light(
       primary: T.accent,
       secondary: T.warn,
       error: T.down,
       surface: T.panel,
       onSurface: T.fg,
-      onPrimary: T.bg,
+      onPrimary: Colors.white,
       outline: T.hairline,
     ),
   );
@@ -179,12 +178,12 @@ ThemeData buildTheme() {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: T.accent,
-        foregroundColor: T.bg,
+        foregroundColor: Colors.white,
         elevation: 0,
         minimumSize: const Size(0, 32),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(T.radiusSm)),
-        textStyle: Type.labelCaps.copyWith(color: T.bg, letterSpacing: 0.12),
+        textStyle: Type.labelCaps.copyWith(color: Colors.white, letterSpacing: 0.12),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -252,8 +251,7 @@ class TermButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final useAccent = color == null;
-    final fg = useAccent ? T.bg : color;
+    const fg = Colors.white;
     final style = ElevatedButton.styleFrom(
       backgroundColor: color ?? T.accent,
       foregroundColor: fg,

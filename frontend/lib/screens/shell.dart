@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../state/app_state.dart';
 import '../theme.dart';
 import '../widgets/widgets.dart';
+import 'agent_bot_screen.dart';
 import 'backtests_screen.dart';
 import 'dashboard_screen.dart';
 import 'markets_screen.dart';
@@ -21,6 +22,7 @@ class Shell extends StatefulWidget {
 
 const _navTabs = [
   (Icons.space_dashboard_rounded, 'DASHBOARD'),
+  (Icons.psychology_rounded, 'AGENT BOT'),
   (Icons.insights_rounded, 'MARKETS'),
   (Icons.account_tree_rounded, 'STRATEGIES'),
   (Icons.folder_open_rounded, 'PORTFOLIO'),
@@ -30,13 +32,14 @@ const _navTabs = [
 ];
 
 class _ShellState extends State<Shell> {
-  int _tab = 0;
+  int _tab = 1; // Default to the Grok Agent Bot screen
 
   @override
   Widget build(BuildContext context) {
     final state = widget.state;
     final screens = [
       DashboardScreen(state: state),
+      AgentBotScreen(state: state),
       MarketsScreen(state: state),
       StrategiesScreen(state: state),
       PortfolioScreen(state: state),
@@ -87,7 +90,12 @@ class _Sidebar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 200,
-      color: T.bgSidebar,
+      decoration: BoxDecoration(
+        color: T.bgSidebar,
+        border: Border(
+          right: BorderSide(color: T.hairline, width: 0.8),
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -96,12 +104,20 @@ class _Sidebar extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                const Icon(Icons.terminal_rounded, color: T.gold, size: 16),
+                Container(
+                  width: 26,
+                  height: 26,
+                  decoration: BoxDecoration(
+                    color: T.accent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Icon(Icons.bolt_rounded, color: T.accent, size: 16),
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'STT',
-                    style: Type.panelTitle.copyWith(letterSpacing: 0.3, color: T.gold),
+                    'GROK BOT',
+                    style: Type.panelTitle.copyWith(letterSpacing: 0.3, color: T.fg, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -109,7 +125,7 @@ class _Sidebar extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 2, 16, 14),
-            child: Text('PAPER TERMINAL',
+            child: Text('AUTONOMOUS TERMINAL',
                 style: Type.labelCaps.copyWith(color: T.fg3, fontSize: 8)),
           ),
           const SizedBox(height: 4),
@@ -172,9 +188,9 @@ class _NavItem extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 160),
           curve: Curves.easeOut,
-          height: 32,
+          height: 34,
           decoration: BoxDecoration(
-            color: active ? T.accent.withValues(alpha: 0.10) : Colors.transparent,
+            color: active ? T.accent.withValues(alpha: 0.12) : Colors.transparent,
             borderRadius: BorderRadius.circular(T.radiusSm),
           ),
           child: Row(
@@ -182,16 +198,17 @@ class _NavItem extends StatelessWidget {
               const SizedBox(width: 12),
               Icon(
                 icon,
-                size: 14,
+                size: 15,
                 color: active ? T.accent : T.fg3,
               ),
               const SizedBox(width: 11),
               Text(
                 label,
                 style: Type.labelCaps.copyWith(
-                  color: active ? T.fg : T.fg3,
+                  color: active ? T.accent : T.fg3,
+                  fontWeight: active ? FontWeight.bold : FontWeight.w600,
                   letterSpacing: 0.12,
-                  fontSize: 10,
+                  fontSize: 10.5,
                 ),
               ),
               const Spacer(),

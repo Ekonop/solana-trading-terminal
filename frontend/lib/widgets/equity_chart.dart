@@ -122,12 +122,12 @@ class EquityChart extends StatelessWidget {
                       spots: spots,
                       isCurved: true,
                       curveSmoothness: 0.35,
-                      color: T.accent,
-                      barWidth: 2,
+                      color: T.up,
+                      barWidth: 2.2,
                       dotData: const FlDotData(show: false),
                       shadow: Shadow(
-                        color: T.accent.withValues(alpha: 0.45),
-                        blurRadius: 8,
+                        color: T.up.withValues(alpha: 0.30),
+                        blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),
                       belowBarData: BarAreaData(
@@ -136,8 +136,8 @@ class EquityChart extends StatelessWidget {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            T.accent.withValues(alpha: 0.20),
-                            T.accent.withValues(alpha: 0.02),
+                            T.up.withValues(alpha: 0.18),
+                            T.up.withValues(alpha: 0.01),
                           ],
                         ),
                       ),
