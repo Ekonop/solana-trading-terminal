@@ -8,8 +8,7 @@ backend/target/
 **/data/stt/
 **/var/pglite/
 **/logs/
-dist/*/var/pglite/
-dist/*/logs/
+dist/
 *.db
 *.sqlite
 
