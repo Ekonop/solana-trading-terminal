@@ -1,0 +1,70 @@
+# Configuration for the Solana Trading Terminal (paper-only).
+# Copy to `stt.toml` or set `STT_CONFIG=/path/to/stt.toml`.
+# All keys and section headers are kebab-case (config structs use
+# #[serde(rename_all = "kebab-case")]): bind-address, [market-data].
+
+version = 1
+
+[application]
+# demo | market-data | replay
+mode = "demo"
+bind-address = "127.0.0.1"
+port = 8765
+log-level = "info"
+
+[database]
+# Persistent data directory for the embedded PostgreSQL instance.
+# Relative paths resolve against the working directory.
+data-directory = "./data/stt"
+
+[market-data]
+# Provider choice currently affects only mode = "market-data".
+provider = "dex-screener"
+refresh-interval-ms = 3000
+request-timeout-ms = 8000
+maximum-data-age-ms = 15000
+max-concurrent-requests = 4
+backoff-base-ms = 500
+max-retries = 3
+# Number of mints to track in the demo universe.
+demo-token-count = 8
+
+[paper-trading]
+# Demo starting balance, in SOL lamports (multiply by 1e9 for SOL).
+# 100 SOL = 100_000_000_000 lamports.
+initial-balance-lamports = 100_000_000_000
+# Fixed fee charged per executed fill, in basis points of notional.
+fee-bps = 25
+# Execution slippage applied to the reference price, in basis points.
+slippage-bps = 10
+slippage-model = "fixed-bps"
+# Maximum single-order notional in USD (risk pre-check).
+max-order-notional-usd = 25000
+
+[risk]
+# Fraction of total account equity allowed in one token (0.0 - 1.0).
+max-position-fraction = 0.25
+# Maximum aggregate long exposure as a fraction of equity.
+max-total-exposure = 0.8
+# Daily realized-loss halt (fraction of day-start equity, 0.0 - 1.0).
+max-daily-loss = 0.10
+# Max drawdown from peak equity before trading halts (fraction).
+max-drawdown = 0.25
+# Maximum open positions at once.
+max-open-positions = 20
+# Minimum liquidity for a market to be tradeable, in USD.
+minimum-liquidity-usd = 25000
+# Minimum 24h volume, in USD.
+minimum-volume-24h-usd = 50000
+# Maximum allowed slippage on a fill, in basis points.
+max-slippage-bps = 150
+# Maximum age of the price reference, in ms.
+max-price-age-ms = 30000
+# Cooldown between buys of the same token, in ms.
+per-token-cooldown-ms = 60000
+# Max allowed price impact of a paper order (currently informational).
+max-liquidity-impact = 0.05
+# Portfolio-stop-loss fraction.
+stop-loss = 0.15
+# Take-profit fraction.
+take-profit = 0.50

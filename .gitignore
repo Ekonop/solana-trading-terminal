@@ -1,0 +1,36 @@
+# Rust
+backend/target/
+**/*.rs.bk
+
+# Local data (embedded PG + logs) — never commit
+**/pglite/
+**/data/pglite/
+**/logs/
+dist/*/var/pglite/
+dist/*/logs/
+*.db
+*.sqlite
+
+# Flutter / Dart
+frontend/build/
+frontend/.dart_tool/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/.packages
+frontend/android/.gradle/
+frontend/android/local.properties
+frontend/ios/Pods/
+frontend/ios/.symlinks/
+frontend/ios/Flutter/ephemeral/
+frontend/*.iml
+**/.idea/
+**/.fleet/
+
+# Exports users pull from the RESEARCH screen
+~/stt-exports/
+stt-exports/
+
+# OS / editors
+.DS_Store
+*.swp
+*~

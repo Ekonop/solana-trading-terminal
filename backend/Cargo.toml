@@ -1,0 +1,49 @@
+[package]
+name = "solana-trading-terminal"
+version = "0.1.0"
+edition = "2021"
+description = "Local-first Solana trading research & paper-trading terminal (simulation only)"
+license = "MIT"
+
+[[bin]]
+name = "stt"
+path = "src/main.rs"
+
+[[bin]]
+name = "db-probe"
+path = "src/bin/db_probe.rs"
+
+[dependencies]
+# Embedded PostgreSQL (in-process, no external server). Pinned exactly.
+pglite = { package = "pglite-rs", version = "=0.2.7" }
+
+tokio = { version = "1", features = ["full"] }
+axum = { version = "0.8", features = ["ws"] }
+tower = { version = "0.5", features = ["limit"] }
+tower-http = { version = "0.6", features = ["cors", "trace"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+thiserror = "2"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+futures = "0.3"
+async-trait = "0.1"
+rand = "0.8"
+rand_chacha = "0.3"
+rust_decimal = { version = "=1.43.0", features = ["serde", "db-postgres"] }
+base64 = "0.22"
+dotenvy = "0.15"
+
+[dev-dependencies]
+tempfile = "3"
+
+[profile.release]
+lto = "thin"
+
+[profile.dev]
+# pglite-rs embeds a compressed postgres runtime; keep debug info reasonable
+debug = 1

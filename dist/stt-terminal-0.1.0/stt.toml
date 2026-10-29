@@ -1,0 +1,48 @@
+# STT Terminal — embedded backend configuration.
+# Paper-only: no real trades, no keys. Demo mode generates the market
+# feed locally and offline; set mode = "market-data" for a read-only
+# DexScreener feed (still no real orders).
+# All keys and section headers are kebab-case ([market-data], bind-address).
+version = 1
+
+[application]
+mode = "demo"
+bind-address = "127.0.0.1"
+port = 8765
+log-level = "info"
+
+[database]
+# Resolved relative to the bundle directory by run.sh (it cd's there).
+data-directory = "./var/pglite"
+
+[market-data]
+provider = "dex-screener"
+refresh-interval-ms = 3000
+request-timeout-ms = 8000
+maximum-data-age-ms = 15000
+max-concurrent-requests = 4
+backoff-base-ms = 500
+max-retries = 3
+demo-token-count = 8
+
+[paper-trading]
+initial-balance-lamports = 100_000_000_000
+fee-bps = 25
+slippage-bps = 10
+slippage-model = "fixed-bps"
+max-order-notional-usd = 25000
+
+[risk]
+max-position-fraction = 0.25
+max-total-exposure = 0.8
+max-daily-loss = 0.10
+max-drawdown = 0.25
+max-open-positions = 20
+minimum-liquidity-usd = 25000
+minimum-volume-24h-usd = 50000
+max-slippage-bps = 150
+max-price-age-ms = 30000
+per-token-cooldown-ms = 60000
+max-liquidity-impact = 0.05
+stop-loss = 0.15
+take-profit = 0.50
