@@ -37,6 +37,7 @@ pub struct AppState {
     pub exec: ExecutorHandle,
     pub strategies: StrategyServiceHandle,
     pub market_data: MarketDataServiceHandle,
+    pub real: Arc<crate::real::RealService>,
     pub account_id: String,
     pub sol_mint: String,
     pub started_at: i64,
@@ -206,6 +207,7 @@ pub async fn run(cfg: Config) -> Result<(), AppError> {
         });
     }
 
+    let real_cfg = cfg.real.clone();
     let state = AppState {
         cfg,
         db: db.clone(),
@@ -214,6 +216,7 @@ pub async fn run(cfg: Config) -> Result<(), AppError> {
         exec,
         strategies: strategies_svc,
         market_data: md_handle,
+        real: Arc::new(crate::real::RealService::new(real_cfg)),
         account_id,
         sol_mint: sol_mint(&provider).to_string(),
         started_at,

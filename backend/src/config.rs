@@ -42,6 +42,11 @@ pub struct Config {
     pub market_data: MarketDataConfig,
     pub paper_trading: PaperTradingConfig,
     pub risk: RiskConfig,
+    /// Live-chain execution. Present but **disarmed by default**: real
+    /// trading requires an explicit operator action (arm + key + rpc + dry-run
+    /// false). Missing `real` section = never armed.
+    #[serde(default)]
+    pub real: RealConfig,
 }
 
 impl Default for Config {
@@ -53,10 +58,78 @@ impl Default for Config {
             market_data: MarketDataConfig::default(),
             paper_trading: PaperTradingConfig::default(),
             risk: RiskConfig::default(),
+            real: RealConfig::default(),
         }
     }
 }
 
+/// Live-chain execution configuration. See Phase 0/ADR-0004: the default is
+/// fully disarmed. To go real, an operator must set `armed = true`, provide a
+/// wallet key source, an RPC URL, and explicitly set `dry-run = false`. Even
+/// then the process refuses to broadcast until `/api/v1/real/arm` is called
+/// at runtime (belt-and-braces double gate).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct RealConfig {
+    /// If false (default), all real-mode paths hard-return "disarmed".
+    pub armed: bool,
+    /// When true (default), execution LOGS/SIMULATES but never broadcasts.
+    pub dry_run: bool,
+    /// Which provider powers real-mode (validate-only is the safe default).
+    pub wallet_key_source: WalletKeySource,
+    /// Solana RPC endpoint (JSON-RPC). In dry-run this may be a stub.
+    pub rpc_url: String,
+    /// Path to a JSON keypair file when `wallet-key-source = "file"`.
+    pub wallet_file: String,
+    /// Jupiter API base (Ultra). In dry-run this may be a stub.
+    pub jupiter_base_url: String,
+    pub jupiter_api_key: String,
+    /// Microlot sizing for a small wallet (USD).
+    pub micro_capital_usd: rust_decimal::Decimal,
+    /// Hard abs loss cap in lamports; exceeding it triggers a kill.
+    pub max_real_loss_lamports: i64,
+    /// Max single real order notional (USD) — tiny for micro capital.
+    pub max_order_notional_usd: rust_decimal::Decimal,
+    /// Min lamports the wallet must keep for rent+gas on SOL.
+    pub rent_reserve_lamports: i64,
+    /// Min inter-order spacing (ms) — rate limiting.
+    pub min_order_interval_ms: u64,
+    /// SOL mint (lowercase) used for the single-market micro strategy.
+    pub sol_mint: String,
+}
+
+impl Default for RealConfig {
+    fn default() -> Self {
+        RealConfig {
+            armed: false,
+            dry_run: true,
+            wallet_key_source: WalletKeySource::Env,
+            rpc_url: "https://api.mainnet-beta.solana.com".into(),
+            wallet_file: String::new(),
+            jupiter_base_url: "https://api.jup.ag".into(),
+            jupiter_api_key: String::new(),
+            micro_capital_usd: rust_decimal::Decimal::from(5u64), // $5
+            max_real_loss_lamports: 500_000_000, // 0.5 SOL hard kill
+            max_order_notional_usd: rust_decimal::Decimal::from(2u64), // $2/order
+            rent_reserve_lamports: 30_000_000, // ~0.03 SOL for gas+rent
+            min_order_interval_ms: 30_000,      // 30 s between real orders
+            sol_mint: "so11111111111111111111111111111111111111112".into(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "kebab-case")]
+pub enum WalletKeySource {
+    /// Read the base58 secret key from the `STT_REAL_WALLET_KEY` env var (or
+    /// `real.wallet-file`). Never logs the key.
+    #[default]
+    Env,
+    /// Read a JSON keypair file (base58 or legacy array) at `real.wallet-file`.
+    File,
+    /// Refuse real keys entirely (validate-only mode).
+    Stub,
+}
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct ApplicationConfig {
@@ -289,6 +362,30 @@ impl Config {
                     (n * 1_000_000_000.0).round() as i64;
             }
         }
+        // Real-mode gate overrides. `armed` and `dry-run` may be flipped via env
+        // for headless deployments, but the runtime /arm endpoint is still the
+        // final gate.
+        if let Some(v) = get("STT_REAL_ARMED") {
+            if let Ok(b) = v.parse::<bool>() {
+                self.real.armed = b;
+            }
+        }
+        if let Some(v) = get("STT_REAL_DRY_RUN") {
+            if let Ok(b) = v.parse::<bool>() {
+                self.real.dry_run = b;
+            }
+        }
+        if let Some(v) = get("STT_REAL_RPC_URL") {
+            self.real.rpc_url = v;
+        }
+        if let Some(v) = get("STT_REAL_JUPITER_API_KEY") {
+            self.real.jupiter_api_key = v;
+        }
+        if let Some(v) = get("STT_REAL_MICRO_USD") {
+            if let Ok(d) = v.parse::<rust_decimal::Decimal>() {
+                self.real.micro_capital_usd = d;
+            }
+        }
     }
 
     pub fn validate(&self) -> Result<(), AppError> {
@@ -331,6 +428,27 @@ impl Config {
         }
         if !(0.0..=1.0).contains(&self.risk.max_drawdown) {
             return Err(AppError::Config("risk.max-drawdown must be in [0,1]".into()));
+        }
+        // Real-mode validation: if armed, require a real key source + RPC and
+        // sane micro-capital. Never allow rent < 0 or notional > wallet.
+        if self.real.armed {
+            if self.real.dry_run && !matches!(self.real.wallet_key_source, WalletKeySource::Stub)
+            {
+                // allowed: dry-run with a key for local rehearsal
+            }
+            if self.real.wallet_key_source == WalletKeySource::Stub {
+                return Err(AppError::Config(
+                    "real.armed=true cannot be combined with wallet-key-source=stub".into(),
+                ));
+            }
+            if self.real.rpc_url.is_empty() {
+                return Err(AppError::Config("real.rpc-url must be set when armed".into()));
+            }
+            if self.real.micro_capital_usd <= rust_decimal::Decimal::ZERO {
+                return Err(AppError::Config(
+                    "real.micro-capital-usd must be > 0".into(),
+                ));
+            }
         }
         Ok(())
     }

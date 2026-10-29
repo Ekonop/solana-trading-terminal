@@ -29,8 +29,8 @@ class T {
   static const radiusSm = 9.0; // buttons / inputs / chips
   static const radiusXs = 6.0; // tiny accents
 
-  static const mono = 'monospace';
-  static const sans = 'sans-serif';
+  static const mono = 'HackMono';
+  static const sans = 'FiraSans';
 }
 
 /// DESIGN.md §3 — typography helpers (softened weights/spacing).
@@ -57,26 +57,26 @@ class Type {
   );
   static const data = TextStyle(
     fontFamily: T.mono,
-    fontSize: 12.5,
+    fontSize: 13,
     color: T.fg,
     fontFeatures: [FontFeature.tabularFigures()],
   );
   static const dataBold = TextStyle(
     fontFamily: T.mono,
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: FontWeight.w700,
     color: T.fg,
     fontFeatures: [FontFeature.tabularFigures()],
   );
   static const dataDim = TextStyle(
     fontFamily: T.mono,
-    fontSize: 12.5,
+    fontSize: 13,
     color: T.fg3,
     fontFeatures: [FontFeature.tabularFigures()],
   );
   static const body = TextStyle(
     fontFamily: T.sans,
-    fontSize: 12.5,
+    fontSize: 13,
     color: T.fg2,
     height: 1.45,
     letterSpacing: 0.01,

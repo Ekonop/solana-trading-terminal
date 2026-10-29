@@ -3,6 +3,7 @@
 pub mod error;
 pub mod exports;
 pub mod handlers;
+pub mod real_handlers;
 pub mod ws;
 
 use std::str::FromStr;
@@ -60,6 +61,13 @@ pub fn router(state: AppState) -> Router {
         .route("/api/v1/export/risk-events", get(exports::export_risk_events))
         .route("/api/v1/export/system-events", get(exports::export_system_events))
         .route("/api/v1/stop-all", post(handlers::stop_all))
+        .route("/api/v1/real/status", get(real_handlers::real_status))
+        .route("/api/v1/real/arm", post(real_handlers::real_arm))
+        .route("/api/v1/real/disarm", post(real_handlers::real_disarm))
+        .route("/api/v1/real/wallet", get(real_handlers::real_wallet))
+        .route("/api/v1/real/quote-dry", get(real_handlers::real_quote_dry))
+        .route("/api/v1/real/sol-price", get(real_handlers::real_sol_price))
+        .route("/api/v1/real/execute-buy", post(real_handlers::real_execute_buy))
         .route("/api/v1/demo/reset", post(handlers::reset_demo_data))
         .route("/api/v1/ws", get(ws::ws_handler))
         .layer(DefaultBodyLimit::max(MAX_BODY_BYTES))

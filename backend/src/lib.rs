@@ -13,6 +13,7 @@ pub mod api;
 pub mod app;
 pub mod events;
 pub mod market_data;
+pub mod real;
 pub mod observability;
 pub mod repos;
 pub mod risk;

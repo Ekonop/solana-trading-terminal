@@ -68,3 +68,34 @@ max-liquidity-impact = 0.05
 stop-loss = 0.15
 # Take-profit fraction.
 take-profit = 0.50
+
+# --- Real-mode (live chain execution) -------------------------------------
+# PHASE 0 SAFETY BOUNDARY (ADR-0004): this section is DISARMED BY DEFAULT.
+# Nothing can broadcast until ALL of the following hold:
+#   1. armed = true            (or STT_REAL_ARMED=true)
+#   2. dry-run = false         (or STT_REAL_DRY_RUN=false)
+#   3. a runtime POST /api/v1/real/arm with written-down operator
+#      acknowledgements (belt-and-braces double gate)
+# Leave as-is to stay purely paper/simulated.
+[real]
+armed = false
+dry-run = true
+# env = read base58 secret from STT_REAL_WALLET_KEY | file = JSON keypair file
+wallet-key-source = "env"
+# JSON keypair file path when wallet-key-source = "file"
+wallet-file = ""
+rpc-url = "https://api.mainnet-beta.solana.com"
+jupiter-base-url = "https://api.jup.ag"
+jupiter-api-key = ""
+# Micro-capital budget for the single-market ($5-style) strategy.
+micro-capital-usd = 5
+# Hard absolute-loss limit in lamports (0.5 SOL here) — exceeding disarms.
+max-real-loss-lamports = 500000000
+# Max single real order notional, in USD.
+max-order-notional-usd = 2
+# Reserve kept for rent + gas (lamports).
+rent-reserve-lamports = 30000000
+# Min spacing between real orders (ms).
+min-order-interval-ms = 30000
+# SOL mint (lowercase) — the only market the micro strategy trades.
+sol-mint = "so11111111111111111111111111111111111111112"

@@ -5,6 +5,8 @@ backend/target/
 # Local data (embedded PG + logs) — never commit
 **/pglite/
 **/data/pglite/
+**/data/stt/
+**/var/pglite/
 **/logs/
 dist/*/var/pglite/
 dist/*/logs/

@@ -74,9 +74,11 @@ Rules:
 
 ## 3. Typography
 
-**Fonts:** JetBrains Mono (fallback chain: `Roboto Mono`, `Menlo`, `Consolas`,
-`monospace`) for ALL numbers, tickers, timestamps, ids, status chips.
-Inter / system sans for prose description text only.
+**Fonts:** Hack (bundled, clean mono) for ALL numbers, tickers, timestamps,
+ids, status chips — with `FontFeature.tabularFigures()` so columns align.
+Fira Sans (bundled, clean humanist sans, weights 400/500/700) for prose and
+labels. Both are **bundled** in `assets/fonts/` and loaded via `pubspec.yaml`,
+so the UI looks identical on any machine (no dependence on system fonts).
 
 Two deliberate conventions (from Perpetua):
 

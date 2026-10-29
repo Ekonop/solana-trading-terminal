@@ -45,6 +45,10 @@ pub enum AppError {
     #[error("invalid lifecycle transition: {0}")]
     Lifecycle(String),
 
+    /// Real-mode errors: disarmed, wallet, chain, jupiter, reconciliation.
+    #[error("real-mode: {0}")]
+    Real(String),
+
     #[error("internal error: {0}")]
     Internal(String),
 }
@@ -66,6 +70,7 @@ impl AppError {
             AppError::MarketData(_) => "market_data_unavailable",
             AppError::Strategy(_) => "strategy_error",
             AppError::Lifecycle(_) => "lifecycle_error",
+            AppError::Real(_) => "real_mode_error",
             AppError::Internal(_) => "internal_error",
         }
     }
@@ -85,6 +90,7 @@ impl AppError {
             AppError::MarketData(_) => 503,
             AppError::Strategy(_) => 500,
             AppError::Lifecycle(_) => 409,
+            AppError::Real(_) => 422,
             AppError::Internal(_) => 500,
         }
     }
