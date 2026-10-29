@@ -3,24 +3,26 @@ import 'package:flutter/material.dart';
 /// DESIGN.md §2 — colors. Softened revision:
 /// warmer near-blacks, gentler layering, desaturated accent, radius everywhere.
 class T {
-  static const bg = Color(0xFF0D1016); // soft warm black
-  static const bgSidebar = Color(0xFF0A0D13);
-  static const panel = Color(0xFF161A23); // raised surface
-  static const panel2 = Color(0xFF1D222E); // interactive surface
-  static const input = Color(0xFF12161F);
-  static const hairline = Color(0xFF242A3A); // barely-there stroke
-  static const hairlineStrong = Color(0xFF2E3550);
-  static const fg = Color(0xFFECEEF6);
-  static const fg2 = Color(0xFF9AA1B8);
-  static const fg3 = Color(0xFF5C6378);
-  static const fg4 = Color(0xFF2A3040);
-  static const accent = Color(0xFF66DBC9); // mint, less neon
-  static const accentStrong = Color(0xFF3CC5B0);
-  static const up = Color(0xFF3FCE9A);
-  static const down = Color(0xFFF27A6E); // softened red
-  static const warn = Color(0xFFE3B45C);
-  static const info = Color(0xFF8FB0E8);
-  static const gold = Color(0xFFDDBB7F);
+  // Soft dark: muted plum-charcoal surfaces, desaturated lavender accent,
+  // gentle pastel semantics. Calm at night, no glow.
+  static const bg = Color(0xFF131218); // deep soft plum-black
+  static const bgSidebar = Color(0xFF0F0E14);
+  static const panel = Color(0xFF1A1921); // raised surface
+  static const panel2 = Color(0xFF23212C); // interactive surface
+  static const input = Color(0xFF17161D);
+  static const hairline = Color(0xFF2B2936); // barely-there stroke
+  static const hairlineStrong = Color(0xFF3A3748);
+  static const fg = Color(0xFFECEAF3);
+  static const fg2 = Color(0xFFB3AFC0);
+  static const fg3 = Color(0xFF736F80);
+  static const fg4 = Color(0xFF3B3847);
+  static const accent = Color(0xFFB9A1F0); // soft lavender, less neon
+  static const accentStrong = Color(0xFF9C82E0);
+  static const up = Color(0xFF93D7AC); // soft sage green
+  static const down = Color(0xFFF0A9A4); // dusty rose
+  static const warn = Color(0xFFE6C98F); // soft honey
+  static const info = Color(0xFFA2B9E8); // pale periwinkle
+  static const gold = Color(0xFFE2C792);
 
   // Soft geometry
   static const radius = 12.0; // panels / big surfaces

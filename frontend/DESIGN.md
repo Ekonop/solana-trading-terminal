@@ -27,42 +27,43 @@ dashboard.
 
 ## 2. Color
 
-Near-black cool surfaces, hairline borders only (no elevation/shadows), one
-electric accent for data + interaction, semantic colors that carry the real
-information (green-up / red-down convention, always).
+Soft-dark: muted plum-charcoal surfaces, hairline borders only (no
+shadow/elevation), one desaturated lavender accent for data + interaction,
+soft pastel semantics that carry the real information (green-up / red-down
+convention, always). Calm at night, no glow.
 
 ### Surfaces
 
 | Token | Hex | Use |
 |---|---|---|
-| `--bg` | `#08090F` | page canvas |
-| `--bg-sidebar` | `#05060F` | sidebar |
-| `--panel` | `#0F1119` | panels, cards |
-| `--panel-2` | `#151824` | raised / hover / pressed |
-| `--input` | `#0B0D16` | inputs, list rows |
-| `--hairline` | `#1E2131` | 1px separators, borders |
-| `--hairline-strong` | `#2A2E44` | strong borders, focus outline |
+| `--bg` | `#131218` | page canvas |
+| `--bg-sidebar` | `#0F0E14` | sidebar |
+| `--panel` | `#1A1921` | panels, cards |
+| `--panel-2` | `#23212C` | raised / hover / pressed |
+| `--input` | `#17161D` | inputs, list rows |
+| `--hairline` | `#2B2936` | 1px separators, borders |
+| `--hairline-strong` | `#3A3748` | strong borders, focus outline |
 
 ### Ink
 
 | Token | Hex | Use |
 |---|---|---|
-| `--fg` | `#E8EAF5` | primary text, prices |
-| `--fg-2` | `#8A8FAB` | secondary text |
-| `--fg-3` | `#4B4F66` | labels, captions, disabled |
-| `--fg-4` | `#232735` | ghost marks, placeholder |
+| `--fg` | `#ECEAF3` | primary text, prices |
+| `--fg-2` | `#B3AFC0` | secondary text |
+| `--fg-3` | `#736F80` | labels, captions, disabled |
+| `--fg-4` | `#3B3847` | ghost marks, placeholder |
 
 ### Semantic / accent
 
 | Token | Hex | Use |
 |---|---|---|
-| `--accent` | `#4DD9C8` | data & interaction: links, focus, live values, charts, WS indicator |
-| `--accent-strong` | `#14B8A6` | accent hover/pressed |
-| `--up` | `#2FCF8E` | gain / buy / filled / running / qualified |
-| `--down` | `#F0584B` | loss / sell / rejected / faulted / drawdown |
-| `--warn` | `#E0B03F` | pending / paused / stale / needs attention |
-| `--info` | `#7AA6E8` | info events, backtest queued |
-| `--gold` | `#D9B362` | brand moments: the agent seal, "AGENT" mark, logo |
+| `--accent` | `#B9A1F0` | soft lavender: data & interaction, links, focus, live values, charts, WS indicator |
+| `--accent-strong` | `#9C82E0` | accent hover/pressed |
+| `--up` | `#93D7AC` | soft sage: gain / buy / filled / running / qualified |
+| `--down` | `#F0A9A4` | dusty rose: loss / sell / rejected / faulted / drawdown |
+| `--warn` | `#E6C98F` | soft honey: pending / paused / stale / needs attention |
+| `--info` | `#A2B9E8` | pale periwinkle: info events, backtest queued |
+| `--gold` | `#E2C792` | brand moments: the agent seal, "AGENT" mark, logo |
 
 Rules:
 - **Never** use `--gold`/`--accent` for market direction. Direction is always
