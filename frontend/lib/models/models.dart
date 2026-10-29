@@ -18,7 +18,7 @@ class JsonHelpers {
 
   static String? sN(Map<String, dynamic> map, List<String> keys) {
     final v = pick(map, keys);
-    return v == null ? null : v.toString();
+    return v?.toString();
   }
 
   static int i(Map<String, dynamic> map, List<String> keys, [int def = 0]) {
@@ -74,6 +74,7 @@ class MarketQuote {
   final int observedAt;
   final int quality;
   final String source;
+  final String network;
 
   MarketQuote({
     required this.mint,
@@ -86,6 +87,7 @@ class MarketQuote {
     required this.observedAt,
     required this.quality,
     required this.source,
+    this.network = 'solana',
   });
 
   factory MarketQuote.fromJson(Map<String, dynamic> m) => MarketQuote(
@@ -99,6 +101,7 @@ class MarketQuote {
         observedAt: JsonHelpers.i(m, ['observed-at', 'observed_at']),
         quality: JsonHelpers.i(m, ['quality']),
         source: JsonHelpers.s(m, ['source']),
+        network: JsonHelpers.s(m, ['network', 'chain'], 'solana'),
       );
 
   MarketQuality get qualityLabel {
@@ -219,6 +222,7 @@ class PositionView {
   final String status;
   final int openedAt;
   final int? closedAt;
+  final int decimals;
 
   PositionView({
     required this.id,
@@ -233,21 +237,23 @@ class PositionView {
     required this.status,
     required this.openedAt,
     this.closedAt,
+    this.decimals = 9,
   });
 
   factory PositionView.fromJson(Map<String, dynamic> m) => PositionView(
-        id: JsonHelpers.s(m, ['id']),
+        id: JsonHelpers.s(m, ['id', 'mint']),
         mint: JsonHelpers.s(m, ['mint']),
         symbol: JsonHelpers.s(m, ['symbol']),
-        direction: JsonHelpers.s(m, ['direction']),
-        quantity: JsonHelpers.s(m, ['quantity'], '0'),
+        direction: JsonHelpers.s(m, ['direction'], 'long'),
+        quantity: JsonHelpers.s(m, ['qty_human', 'qty-human', 'quantity'], '0'),
         avgEntryPrice: JsonHelpers.s(m, ['avg-entry-price', 'avg_entry_price'], '0'),
-        currentPrice: JsonHelpers.s(m, ['current-price', 'current_price'], '0'),
-        unrealizedPnlUsd: JsonHelpers.s(m, ['unrealized-pnl-usd', 'unrealized_pnl_usd'], '0'),
-        notionalUsd: JsonHelpers.s(m, ['notional-usd', 'notional_usd'], '0'),
-        status: JsonHelpers.s(m, ['status']),
+        currentPrice: JsonHelpers.s(m, ['mark_price', 'mark-price', 'current-price', 'current_price'], '0'),
+        unrealizedPnlUsd: JsonHelpers.s(m, ['unrealized_pnl_usd', 'unrealized-pnl-usd', 'unrealized_usd', 'unrealized-usd'], '0'),
+        notionalUsd: JsonHelpers.s(m, ['market_value_usd', 'market-value-usd', 'notional-usd', 'notional_usd'], '0'),
+        status: JsonHelpers.s(m, ['status'], 'open'),
         openedAt: JsonHelpers.i(m, ['opened-at', 'opened_at']),
         closedAt: JsonHelpers.i(m, ['closed-at', 'closed_at']).let((v) => v == 0 ? null : v),
+        decimals: JsonHelpers.i(m, ['decimals'], 9),
       );
 
   double get pnlD => double.tryParse(unrealizedPnlUsd) ?? 0;

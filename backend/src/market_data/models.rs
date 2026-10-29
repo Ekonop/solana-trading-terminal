@@ -17,8 +17,15 @@ pub struct ProviderQuote {
     pub liquidity_usd: Option<Decimal>,
     pub volume_24h_usd: Option<Decimal>,
     pub decimals: Option<i32>,
+    /// Chain/network (solana, ethereum, base, ...).
+    #[serde(default = "default_network")]
+    pub network: String,
     /// Provider observation time (micros). Filled by the provider or now().
     pub observed_at: i64,
+}
+
+fn default_network() -> String {
+    "solana".into()
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
@@ -114,5 +121,6 @@ pub fn quote_to_snapshot(q: &ProviderQuote, source: &str, simulated: bool, now: 
         observed_at: q.observed_at,
         received_at: now,
         quality,
+        network: q.network.clone(),
     }
 }

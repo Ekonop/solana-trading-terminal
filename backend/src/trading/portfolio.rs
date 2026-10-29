@@ -48,7 +48,7 @@ pub fn value_positions(
             continue;
         }
         if let Some(price) = marks.price_of(&p.mint) {
-            let human = crate::trading::models::math::raw_to_human(p.qty_raw, 9);
+            let human = crate::trading::models::math::raw_to_human(p.qty_raw, p.decimals);
             value += human * price;
             unrealized += human * (price - p.avg_entry_price);
         }
@@ -130,10 +130,54 @@ mod tests {
             status: "open".into(),
             opened_at: 0,
             updated_at: 0,
+            decimals: 9,
         }];
         // cash $150 = 1 SOL => equity = 150 + (50 * 0.000002 = 0.0001) = 150.0001
         let v = equity(&acct(1_000_000_000), &positions, &marks);
         assert_eq!(v.equity_usd, Decimal::from_str_exact("150.000100").unwrap() + Decimal::ZERO);
         assert_eq!(v.unrealized_pnl_usd, Decimal::from_str_exact("0.000050").unwrap());
+    }
+
+    #[test]
+    fn equity_handles_non_nine_decimals() {
+        let marks = MarkPrices {
+            prices: HashMap::from([
+                ("bonk_5dec".to_string(), Decimal::from_str_exact("0.000030").unwrap()),
+                ("usdc_6dec".to_string(), Decimal::from_str_exact("1.000000").unwrap()),
+            ]),
+            solusd: Decimal::from(150u64),
+        };
+        // 100,000 BONK with 5 decimals -> raw = 100_000 * 10^5 = 10_000_000_000
+        // value = 100_000 * 0.000030 = $3.00
+        // 50 USDC with 6 decimals -> raw = 50 * 10^6 = 50_000_000
+        // value = 50 * 1.00 = $50.00
+        let positions = vec![
+            Position {
+                account_id: "a".into(),
+                mint: "bonk_5dec".into(),
+                qty_raw: 10_000_000_000,
+                avg_entry_price: Decimal::from_str_exact("0.000020").unwrap(),
+                status: "open".into(),
+                opened_at: 0,
+                updated_at: 0,
+                decimals: 5,
+            },
+            Position {
+                account_id: "a".into(),
+                mint: "usdc_6dec".into(),
+                qty_raw: 50_000_000,
+                avg_entry_price: Decimal::from_str_exact("1.000000").unwrap(),
+                status: "open".into(),
+                opened_at: 0,
+                updated_at: 0,
+                decimals: 6,
+            },
+        ];
+        // cash $150 (1 SOL) + $3 + $50 = $203
+        // unrealized = 100,000 * (0.000030 - 0.000020) + 0 = $1.00
+        let v = equity(&acct(1_000_000_000), &positions, &marks);
+        assert_eq!(v.positions_value_usd, Decimal::from(53));
+        assert_eq!(v.equity_usd, Decimal::from(203));
+        assert_eq!(v.unrealized_pnl_usd, Decimal::from(1));
     }
 }

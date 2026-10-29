@@ -40,7 +40,7 @@ class TermPanel extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(child: Text(title.toUpperCase(), style: Type.panelTitle)),
-                if (trailing != null) trailing!,
+                ?trailing,
               ],
             ),
           ),
@@ -310,21 +310,60 @@ class ErrorBanner extends StatelessWidget {
   }
 }
 
-/// Small symbol/name header used across tables.
-class SymbolCell extends StatelessWidget {
-  const SymbolCell({super.key, required this.symbol, this.name});
-  final String symbol;
-  final String? name;
+/// Network badge for multichain market identification.
+class NetworkBadge extends StatelessWidget {
+  const NetworkBadge(this.network, {super.key});
+  final String network;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    final col = T.networkColor(network);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+      decoration: BoxDecoration(
+        color: col.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(T.radiusXs),
+        border: Border.all(color: col.withValues(alpha: 0.35), width: 0.8),
+      ),
+      child: Text(
+        network.toUpperCase(),
+        style: Type.labelCaps.copyWith(
+          color: col,
+          fontSize: 8,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.3,
+        ),
+      ),
+    );
+  }
+}
+
+/// Small symbol/name header used across tables.
+class SymbolCell extends StatelessWidget {
+  const SymbolCell({super.key, required this.symbol, this.name, this.network});
+  final String symbol;
+  final String? name;
+  final String? network;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(symbol, style: Type.dataBold),
-        if (name != null && name!.isNotEmpty)
-          Text(name!, style: Type.labelCaps.copyWith(color: T.fg3, fontSize: 8), overflow: TextOverflow.ellipsis),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(symbol, style: Type.dataBold),
+            if (name != null && name!.isNotEmpty)
+              Text(name!, style: Type.labelCaps.copyWith(color: T.fg3, fontSize: 8), overflow: TextOverflow.ellipsis),
+          ],
+        ),
+        if (network != null && network!.isNotEmpty) ...[
+          const SizedBox(width: 6),
+          NetworkBadge(network!),
+        ],
       ],
     );
   }

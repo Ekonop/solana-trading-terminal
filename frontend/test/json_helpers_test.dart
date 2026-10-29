@@ -85,6 +85,49 @@ void main() {
       expect(q.liquidityUsd, '12');
       expect(q.stale, isTrue);
       expect(q.quality, 2);
+      expect(q.network, 'solana');
+    });
+
+    test('parses multi-network quotes', () {
+      final eth = MarketQuote.fromJson({
+        'mint': '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        'symbol': 'ETH',
+        'network': 'ethereum',
+        'price': '2540.00',
+      });
+      expect(eth.symbol, 'ETH');
+      expect(eth.network, 'ethereum');
+      expect(eth.priceD, 2540.0);
+
+      final base = MarketQuote.fromJson({
+        'mint': '0x532f27101965dd16442e59d40670faf5ebb142e4',
+        'symbol': 'BRETT',
+        'chain': 'base',
+        'price': '0.088',
+      });
+      expect(base.symbol, 'BRETT');
+      expect(base.network, 'base');
+    });
+  });
+
+  group('PositionView.fromJson', () {
+    test('parses decimals and non-9-decimal positions', () {
+      final pos = PositionView.fromJson({
+        'mint': 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263',
+        'symbol': 'BONK',
+        'direction': 'long',
+        'qty_human': '100000',
+        'decimals': 5,
+        'avg_entry_price': '0.000020',
+        'mark_price': '0.000030',
+        'market_value_usd': '3.00',
+        'unrealized_pnl_usd': '1.00',
+      });
+      expect(pos.symbol, 'BONK');
+      expect(pos.decimals, 5);
+      expect(pos.quantity, '100000');
+      expect(pos.quantityD, 100000.0);
+      expect(pos.pnlD, 1.0);
     });
   });
 

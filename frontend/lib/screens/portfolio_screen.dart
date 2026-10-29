@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../config.dart';
+import '../models/models.dart';
 import '../state/app_state.dart';
 import '../theme.dart';
 import '../widgets/widgets.dart';
@@ -70,7 +71,7 @@ class PortfolioScreen extends StatelessWidget {
   void _showOrderSheet(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (_) => _OrderDialog(state: state),
+      builder: (_) => OrderDialog(state: state),
     );
   }
 }
@@ -82,34 +83,68 @@ class _PositionsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _ListShell(
-      panelTitle: 'POSITIONS',
-      empty: 'NO POSITIONS',
+      panelTitle: 'OPEN POSITIONS',
+      empty: 'NO OPEN POSITIONS',
       table: TermTable(
         columns: const [
-          TermColumn('SYM'),
+          TermColumn('ASSET'),
           TermColumn('DIR'),
           TermColumn('QTY', align: TextAlign.right),
           TermColumn('AVG ENTRY', align: TextAlign.right),
-          TermColumn('LAST', align: TextAlign.right),
+          TermColumn('MARK PRICE', align: TextAlign.right),
           TermColumn('NOTIONAL', align: TextAlign.right),
           TermColumn('uPNL', align: TextAlign.right),
           TermColumn('OPENED'),
+          TermColumn('ACTION', align: TextAlign.center),
         ],
         rows: [
           for (final p in state.positions)
-            [
-              SymbolCell(symbol: p.symbol),
-              StatusChip(
-                label: p.direction,
-                color: p.direction.toLowerCase() == 'long' ? T.up : T.down,
-              ),
-              Text(p.quantity, style: Type.data),
-              Text(p.avgEntryPrice, style: Type.data),
-              Text(p.currentPrice, style: Type.data),
-              Text(Fmt.usd(p.notionalUsd), style: Type.data),
-              DirText.fromJson(p.unrealizedPnlUsd, bold: true),
-              TimeCell(p.openedAt),
-            ],
+            () {
+              final quote = state.markets.cast<MarketQuote?>().firstWhere(
+                    (m) => m?.mint == p.mint,
+                    orElse: () => null,
+                  );
+              return [
+                SymbolCell(symbol: p.symbol, network: quote?.network),
+                StatusChip(
+                  label: p.direction,
+                  color: p.direction.toLowerCase() == 'long' ? T.up : T.down,
+                ),
+                Text(p.quantity, style: Type.dataBold),
+                Text(p.avgEntryPrice, style: Type.data),
+                Text(p.currentPrice, style: Type.data),
+                Text(Fmt.usd(p.notionalUsd), style: Type.data),
+                DirText.fromJson(p.unrealizedPnlUsd, bold: true),
+                TimeCell(p.openedAt),
+                GestureDetector(
+                  onTap: () {
+                    showDialog<void>(
+                      context: context,
+                      builder: (_) => OrderDialog(
+                        state: state,
+                        initialMint: p.mint,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: T.down.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(T.radiusXs),
+                      border: Border.all(color: T.down.withValues(alpha: 0.35)),
+                    ),
+                    child: Text(
+                      'EXIT',
+                      style: Type.labelCaps.copyWith(
+                        color: T.down,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ];
+            }(),
         ],
       ),
     );
@@ -212,23 +247,34 @@ class _ListShell extends StatelessWidget {
   }
 }
 
-class _OrderDialog extends StatefulWidget {
-  const _OrderDialog({required this.state});
+class OrderDialog extends StatefulWidget {
+  const OrderDialog({super.key, required this.state, this.initialMint});
   final AppState state;
+  final String? initialMint;
 
   @override
-  State<_OrderDialog> createState() => _OrderDialogState();
+  State<OrderDialog> createState() => _OrderDialogState();
 }
 
-class _OrderDialogState extends State<_OrderDialog> {
-  final _mint =
-      TextEditingController(text: 'so11111111111111111111111111111111111111112');
+class _OrderDialogState extends State<OrderDialog> {
+  late final TextEditingController _mint;
   final _size = TextEditingController(text: '50');
   final _price = TextEditingController();
   String _side = 'BUY';
   String _type = 'market';
   String? _err;
   bool _submitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _mint = TextEditingController(
+      text: widget.initialMint ??
+          (widget.state.markets.isNotEmpty
+              ? widget.state.markets.first.mint
+              : 'so11111111111111111111111111111111111111112'),
+    );
+  }
 
   @override
   void dispose() {
@@ -240,78 +286,285 @@ class _OrderDialogState extends State<_OrderDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final selectedQuote = widget.state.markets.cast<MarketQuote?>().firstWhere(
+          (m) => m?.mint == _mint.text.trim(),
+          orElse: () => null,
+        );
+
     return AlertDialog(
-      backgroundColor: T.panel2,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-      title: Text('NEW PAPER ORDER', style: Type.panelTitle),
+      backgroundColor: T.panel,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(T.radius),
+        side: const BorderSide(color: T.hairlineStrong),
+      ),
+      titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+      actionsPadding: const EdgeInsets.fromLTRB(20, 12, 20, 18),
+      title: Row(
+        children: [
+          Text('NEW PAPER ORDER', style: Type.panelTitle.copyWith(fontSize: 14)),
+          const SizedBox(width: 8),
+          const SimBadge(),
+          const Spacer(),
+          if (selectedQuote != null) NetworkBadge(selectedQuote.network),
+        ],
+      ),
       content: SizedBox(
-        width: 380,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _seg('SIDE', ['BUY', 'SELL'], _side, (v) => setState(() => _side = v)),
-            const SizedBox(height: 10),
-            _seg('TYPE', ['market', 'limit'], _type, (v) => setState(() => _type = v)),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _mint,
-              style: Type.data,
-              decoration: const InputDecoration(labelText: 'MINT'),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _size,
-              style: Type.data,
-              decoration: const InputDecoration(labelText: 'SIZE (USD)'),
-            ),
-            if (_type == 'limit') ...[
-              const SizedBox(height: 8),
-              TextField(
-                controller: _price,
-                style: Type.data,
-                decoration: const InputDecoration(labelText: 'LIMIT PRICE (USD)'),
+        width: 440,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Side & Type row
+              Row(
+                children: [
+                  Expanded(
+                    child: _seg('SIDE', ['BUY', 'SELL'], _side, (v) => setState(() => _side = v)),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _seg('TYPE', ['market', 'limit'], _type, (v) => setState(() => _type = v)),
+                  ),
+                ],
               ),
+              const SizedBox(height: 14),
+
+              // Quick token selector
+              Text('QUICK SELECT TOKEN', style: Type.labelCaps),
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (final q in widget.state.markets.take(12))
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _mint.text = q.mint;
+                          if (_type == 'limit' && _price.text.isEmpty) {
+                            _price.text = q.price;
+                          }
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _mint.text.trim() == q.mint ? T.accent.withValues(alpha: 0.2) : T.input,
+                          borderRadius: BorderRadius.circular(T.radiusXs),
+                          border: Border.all(
+                            color: _mint.text.trim() == q.mint ? T.accent : T.hairline,
+                          ),
+                        ),
+                        child: Text(
+                          q.symbol,
+                          style: Type.dataBold.copyWith(
+                            fontSize: 11,
+                            color: _mint.text.trim() == q.mint ? T.accent : T.fg2,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // Mint input
+              TextField(
+                controller: _mint,
+                style: Type.data.copyWith(fontSize: 12),
+                decoration: InputDecoration(
+                  labelText: 'TOKEN MINT / ADDRESS',
+                  labelStyle: Type.labelCaps,
+                  filled: true,
+                  fillColor: T.input,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(T.radiusSm),
+                    borderSide: const BorderSide(color: T.hairline),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(T.radiusSm),
+                    borderSide: const BorderSide(color: T.hairline),
+                  ),
+                ),
+                onChanged: (_) => setState(() {}),
+              ),
+              if (selectedQuote != null) ...[
+                const SizedBox(height: 6),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Row(
+                    children: [
+                      Text(
+                        '${selectedQuote.name} · Mark: ${Fmt.usd(selectedQuote.price)}',
+                        style: Type.body.copyWith(fontSize: 11, color: T.fg3),
+                      ),
+                      const Spacer(),
+                      Text('24h Vol: ${_compactUsd(selectedQuote.volume24hUsd)}',
+                          style: Type.body.copyWith(fontSize: 11, color: T.fg3)),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 12),
+
+              // Size input + quick presets
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _size,
+                      style: Type.dataBold,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(
+                        labelText: 'NOTIONAL (USD)',
+                        prefixText: '\$ ',
+                        labelStyle: Type.labelCaps,
+                        filled: true,
+                        fillColor: T.input,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(T.radiusSm),
+                          borderSide: const BorderSide(color: T.hairline),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(T.radiusSm),
+                          borderSide: const BorderSide(color: T.hairline),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  for (final amt in ['25', '50', '100', '250'])
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4),
+                      child: GestureDetector(
+                        onTap: () => setState(() => _size.text = amt),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: _size.text == amt ? T.accent.withValues(alpha: 0.2) : T.panel2,
+                            borderRadius: BorderRadius.circular(T.radiusXs),
+                            border: Border.all(
+                              color: _size.text == amt ? T.accent : T.hairline,
+                            ),
+                          ),
+                          child: Text('\$$amt', style: Type.dataBold.copyWith(fontSize: 11)),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+
+              if (_type == 'limit') ...[
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _price,
+                  style: Type.dataBold,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: 'LIMIT PRICE (USD)',
+                    prefixText: '\$ ',
+                    labelStyle: Type.labelCaps,
+                    filled: true,
+                    fillColor: T.input,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(T.radiusSm),
+                      borderSide: const BorderSide(color: T.hairline),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(T.radiusSm),
+                      borderSide: const BorderSide(color: T.hairline),
+                    ),
+                  ),
+                ),
+              ],
+
+              if (_err != null) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: T.down.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(T.radiusSm),
+                    border: Border.all(color: T.down.withValues(alpha: 0.4)),
+                  ),
+                  child: Text(_err!, style: Type.data.copyWith(color: T.down, fontSize: 11)),
+                ),
+              ],
             ],
-            if (_err != null) ...[
-              const SizedBox(height: 8),
-              Text(_err!, style: Type.data.copyWith(color: T.down, fontSize: 10)),
-            ],
-          ],
+          ),
         ),
       ),
       actions: [
         TextButton(
           onPressed: _submitting ? null : () => Navigator.of(context).pop(),
-          child: const Text('CANCEL'),
+          child: Text('CANCEL', style: Type.labelCaps.copyWith(color: T.fg3)),
         ),
-        TermButton(label: 'SUBMIT', onPressed: _submitting ? null : _submit),
+        TermButton(
+          label: _side == 'BUY' ? 'SUBMIT BUY ORDER' : 'SUBMIT SELL ORDER',
+          icon: _side == 'BUY' ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
+          onPressed: _submitting ? null : _submit,
+        ),
       ],
     );
   }
 
   Widget _seg(String label, List<String> items, String selected, ValueChanged<String> onPick) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(width: 90, child: Text(label, style: Type.labelCaps)),
-        for (final it in items)
-          Padding(
-            padding: const EdgeInsets.only(right: 6),
-            child: GestureDetector(
-              onTap: () => onPick(it),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                color: selected == it ? T.accent : T.input,
-                child: Text(
-                  it.toUpperCase(),
-                  style: Type.labelCaps.copyWith(
-                    color: selected == it ? T.bg : T.fg2,
+        Text(label, style: Type.labelCaps),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            for (final it in items)
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(right: it == items.last ? 0 : 6),
+                  child: GestureDetector(
+                    onTap: () => onPick(it),
+                    child: Container(
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: selected == it
+                            ? (it == 'BUY'
+                                ? T.up.withValues(alpha: 0.2)
+                                : (it == 'SELL' ? T.down.withValues(alpha: 0.2) : T.accent.withValues(alpha: 0.2)))
+                            : T.input,
+                        borderRadius: BorderRadius.circular(T.radiusSm),
+                        border: Border.all(
+                          color: selected == it
+                              ? (it == 'BUY' ? T.up : (it == 'SELL' ? T.down : T.accent))
+                              : T.hairline,
+                        ),
+                      ),
+                      child: Text(
+                        it.toUpperCase(),
+                        style: Type.labelCaps.copyWith(
+                          color: selected == it
+                              ? (it == 'BUY' ? T.up : (it == 'SELL' ? T.down : T.accent))
+                              : T.fg2,
+                          fontWeight: selected == it ? FontWeight.w700 : FontWeight.w500,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
+          ],
+        ),
       ],
     );
+  }
+
+  static String _compactUsd(String raw) {
+    final v = double.tryParse(raw) ?? 0;
+    if (v >= 1e9) return '\$${(v / 1e9).toStringAsFixed(2)}B';
+    if (v >= 1e6) return '\$${(v / 1e6).toStringAsFixed(2)}M';
+    if (v >= 1e3) return '\$${(v / 1e3).toStringAsFixed(2)}K';
+    return '\$${v.toStringAsFixed(0)}';
   }
 
   Future<void> _submit() async {

@@ -21,8 +21,10 @@ pub struct EquityStats {
 
 /// Compute statistics over an equity series (oldest first).
 pub fn equity_stats(series: &[EquitySnapshot]) -> EquityStats {
-    let mut stats = EquityStats::default();
-    stats.sample_points = series.len();
+    let mut stats = EquityStats {
+        sample_points: series.len(),
+        ..Default::default()
+    };
     let Some(_first) = series.first() else {
         return stats;
     };

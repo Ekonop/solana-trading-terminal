@@ -56,13 +56,19 @@ pub mod math {
         if decimals <= 0 {
             return Decimal::from(raw);
         }
-        Decimal::from(raw) / Decimal::from(10_i64.pow(decimals as u32))
+        let exp = (decimals as u32).min(18);
+        let divisor = Decimal::from(10_u64.pow(exp));
+        Decimal::from(raw) / divisor
     }
 
     /// Human-readable quantity -> raw base units (rounded half-up).
     pub fn human_to_raw(human: Decimal, decimals: i32) -> i64 {
-        let scaled = human * Decimal::from(10_i64.pow(decimals as u32));
-        round_half_up(scaled)
+        if decimals <= 0 {
+            return round_half_up(human);
+        }
+        let exp = (decimals as u32).min(18);
+        let multiplier = Decimal::from(10_u64.pow(exp));
+        round_half_up(human * multiplier)
     }
 
     /// Notional USD for a raw quantity at a price.

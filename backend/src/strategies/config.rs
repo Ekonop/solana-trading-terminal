@@ -148,7 +148,7 @@ pub fn position_value_usd(positions: &[Position], mint: &str, price: Decimal) ->
     positions
         .iter()
         .find(|p| p.mint == mint)
-        .map(|p| crate::trading::models::math::raw_to_human(p.qty_raw, 9) * price)
+        .map(|p| crate::trading::models::math::raw_to_human(p.qty_raw, p.decimals) * price)
         .unwrap_or(Decimal::ZERO)
 }
 
@@ -177,6 +177,7 @@ mod tests {
             observed_at: ts,
             received_at: ts,
             quality: 100,
+            network: "solana".into(),
         }
     }
 

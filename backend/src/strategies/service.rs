@@ -558,10 +558,9 @@ pub async fn risk_manager_equity_placeholder(
 ) -> rust_decimal::Decimal {
     match repos::accounts::get_account(db, account_id).await {
         Ok(account) => {
-            let positions = match repos::trading::list_positions(db, account_id).await {
-                Ok(p) => p,
-                Err(_) => Vec::new(),
-            };
+            let positions = repos::trading::list_positions(db, account_id)
+                .await
+                .unwrap_or_default();
             let marks = crate::trading::portfolio::marks_from_snapshots(
                 &cache.latest_all().await,
                 sol_mint,

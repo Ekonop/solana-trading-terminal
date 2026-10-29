@@ -86,7 +86,7 @@ pub async fn dashboard(State(st): State<AppState>) -> ApiResult<Json<serde_json:
         .filter(|p| p.qty_raw > 0)
         .map(|p| {
             let price = marks.price_of(&p.mint);
-            let human = raw_to_human(p.qty_raw, 9);
+            let human = raw_to_human(p.qty_raw, p.decimals);
             PositionView {
                 position: p.clone(),
                 mark_price: price,
@@ -193,12 +193,13 @@ pub async fn positions(State(st): State<AppState>) -> ApiResult<Json<serde_json:
     let mut views = Vec::new();
     for p in positions.iter().filter(|p| p.qty_raw > 0) {
         let price = marks.price_of(&p.mint);
-        let human = raw_to_human(p.qty_raw, 9);
+        let human = raw_to_human(p.qty_raw, p.decimals);
         views.push(serde_json::json!({
             "mint": p.mint,
             "symbol": snaps.iter().find(|s| s.mint == p.mint).and_then(|s| s.symbol.clone()),
             "qty_raw": p.qty_raw,
             "qty_human": human,
+            "decimals": p.decimals,
             "avg_entry_price": p.avg_entry_price,
             "mark_price": price,
             "market_value_usd": price.map(|pr| human * pr),
@@ -483,6 +484,7 @@ pub async fn markets(State(st): State<AppState>) -> ApiResult<Json<serde_json::V
             "volume_24h_usd": s.volume_24h_usd,
             "source": s.source,
             "is_simulated": s.is_simulated,
+            "network": s.network,
             "observed_at": s.observed_at,
             "quality": s.quality,
             "quality_label": s.quality_label(st.cfg.market_data.maximum_data_age_ms),

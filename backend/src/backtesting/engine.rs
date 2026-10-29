@@ -205,7 +205,7 @@ async fn portfolio_equity(portfolio: &SimPortfolio, snaps: &[MarketSnapshot]) ->
     for p in portfolio.positions.values() {
         if p.qty_raw > 0 {
             if let Some(price) = marks.price_of(&p.mint) {
-                value += raw_to_human(p.qty_raw, 9) * price;
+                value += raw_to_human(p.qty_raw, p.decimals) * price;
             }
         }
     }
@@ -258,6 +258,7 @@ async fn apply_replay(
                     status: "open".into(),
                     opened_at: 0,
                     updated_at: 0,
+                    decimals,
                 });
             let total = entry.qty_raw + qty;
             if total > 0 {

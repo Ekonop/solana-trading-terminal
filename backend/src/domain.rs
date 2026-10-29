@@ -114,6 +114,13 @@ pub struct MarketSnapshot {
     pub observed_at: i64,
     pub received_at: i64,
     pub quality: i32,
+    /// Chain/network this token trades on (solana, ethereum, base, ...).
+    #[serde(default = "default_network")]
+    pub network: String,
+}
+
+fn default_network() -> String {
+    "solana".into()
 }
 
 impl MarketSnapshot {
@@ -264,6 +271,9 @@ pub struct Position {
     pub status: String,
     pub opened_at: i64,
     pub updated_at: i64,
+    /// Token decimals saved at fill time so valuations are exact for any
+    /// token, not assumed 9 (bug-fix).
+    pub decimals: i32,
 }
 
 // ---------------------------------------------------------------------------

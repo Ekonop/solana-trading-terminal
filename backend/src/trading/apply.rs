@@ -391,6 +391,7 @@ async fn position_after(
                 status: "open".into(),
                 opened_at: p.opened_at,
                 updated_at: now,
+                decimals: p.decimals,
             })
         }
         (OrderSide::Buy, None) => Ok(Position {
@@ -401,6 +402,7 @@ async fn position_after(
             status: "open".into(),
             opened_at: now,
             updated_at: now,
+            decimals,
         }),
         (OrderSide::Sell, Some(p)) if p.qty_raw - qty_raw > 0 => Ok(Position {
             account_id: p.account_id.clone(),
@@ -410,6 +412,7 @@ async fn position_after(
             status: "open".into(),
             opened_at: p.opened_at,
             updated_at: now,
+            decimals: p.decimals,
         }),
         (OrderSide::Sell, _) => Ok(Position {
             account_id: order.account_id.clone(),
@@ -419,6 +422,7 @@ async fn position_after(
             status: "closed".into(),
             opened_at: now,
             updated_at: now,
+            decimals,
         }),
     }
 }

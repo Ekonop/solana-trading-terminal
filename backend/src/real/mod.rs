@@ -55,11 +55,7 @@ impl RealService {
     pub fn new(cfg: RealConfig) -> Self {
         // Start disarmed. Even if the operator set armed=true in config, we
         // still require the runtime `/arm` handshake to broadcast.
-        let runtime_armed = if cfg.armed && !cfg.dry_run {
-            AtomicBool::new(false) // config alone never broadcasts
-        } else {
-            AtomicBool::new(false)
-        };
+        let runtime_armed = AtomicBool::new(false);
         Self {
             cfg,
             runtime_armed,

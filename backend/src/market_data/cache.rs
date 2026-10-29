@@ -75,7 +75,7 @@ impl MarketCache {
     pub async fn latest_all(&self) -> Vec<MarketSnapshot> {
         let g = self.inner.read().await;
         let mut v: Vec<MarketSnapshot> = g.latest.values().cloned().collect();
-        v.sort_by(|a, b| b.observed_at.cmp(&a.observed_at));
+        v.sort_by_key(|a| std::cmp::Reverse(a.observed_at));
         v
     }
 

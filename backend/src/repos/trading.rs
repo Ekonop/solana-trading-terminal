@@ -67,6 +67,7 @@ fn row_to_position(r: &pglite::Row) -> Result<Position, AppError> {
         status: row_str(r, "status")?,
         opened_at: row_i64(r, "opened_at")?,
         updated_at: row_i64(r, "updated_at")?,
+        decimals: row_i32(r, "decimals").unwrap_or(9),
     })
 }
 
@@ -339,13 +340,14 @@ pub async fn upsert_position(
 ) -> Result<(), AppError> {
     db.query(
         "INSERT INTO positions
-            (account_id, mint, qty_raw, avg_entry_price, status, opened_at, updated_at)
-         VALUES ($1,$2,$3,$4,'open',$5,$6)
+            (account_id, mint, qty_raw, avg_entry_price, status, opened_at, updated_at, decimals)
+         VALUES ($1,$2,$3,$4,'open',$5,$6,$7)
          ON CONFLICT (account_id, mint) DO UPDATE SET
             qty_raw = $3,
             avg_entry_price = $4,
             status = 'open',
-            updated_at = $6",
+            updated_at = $6,
+            decimals = $7",
         &[
             &p.account_id,
             &p.mint,
@@ -353,6 +355,7 @@ pub async fn upsert_position(
             &p.avg_entry_price,
             &p.opened_at,
             &p.updated_at,
+            &p.decimals,
         ],
     )
     .await

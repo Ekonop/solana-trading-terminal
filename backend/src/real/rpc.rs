@@ -79,7 +79,7 @@ impl SolanaRpc {
             )
             .await?;
         let arr = r.as_array().ok_or_else(|| AppError::Real("bad statuses array".into()))?;
-        let first = arr.get(0);
+        let first = arr.first();
         match first {
             None | Some(Value::Null) => Ok(None),
             Some(e) => {

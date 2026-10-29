@@ -32,7 +32,8 @@ class Fmt {
     if (v == null) return '\$$raw';
     if (v.abs() >= 1000) return '\$${v.toStringAsFixed(2)}';
     if (v.abs() >= 1) return '\$${v.toStringAsFixed(4)}';
-    return '\$${v.toStringAsFixed(6)}';
+    if (v.abs() >= 0.0001) return '\$${v.toStringAsFixed(6)}';
+    return '\$${v.toStringAsFixed(8)}';
   }
 
   static String sol(int lamports) {

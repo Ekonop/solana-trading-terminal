@@ -157,7 +157,7 @@ impl Strategy for Momentum {
                         continue;
                     }
                 }
-                if !held_exitable(&ctx.positions, &snap.mint) {
+                if !held_exitable(ctx.positions, &snap.mint) {
                     continue;
                 }
             } else {

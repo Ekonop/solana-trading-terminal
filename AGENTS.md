@@ -44,6 +44,15 @@ in `insert_order` (repos/trading.rs) and `insert_signal` (repos/strategies.rs).
 before any fill/signal attaches to it. `insert_and_fill` inserts the order
 row first (status open), then outcome paths only finalize status.
 
+### Multi-network token dimensions & decimals
+- **Decimals**: `positions.decimals` is stored and returned on positions so
+  tokens with decimals != 9 (BONK=5, USDC=6, ETH/EVM tokens=18) are marked
+  and valued with exact precision across portfolio, executor risk gates,
+  dashboard, and backtesting.
+- **Networks**: `network` dimension is stored on market snapshots and quotes;
+  DexScreener and mock provider surface tokens across Solana, Ethereum, Base,
+  Arbitrum, and BSC. UI provides network filter pills and color-coded badges.
+
 ### Manual orders
 API handler fabricates `strategy_id: "manual"` (there is no strategies row for
 it) → executor maps the sentinel to `None`/NULL at intent-construction time.

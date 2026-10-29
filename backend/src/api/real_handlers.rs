@@ -137,6 +137,6 @@ pub async fn real_execute_buy(State(st): State<AppState>) -> ApiResult<Json<serd
         .unwrap_or(150.0);
     match exec.execute_buy(&wallet, sol_usd).await {
         Ok(summary) => Ok(Json(json!({ "ok": true, "dry_run": exec.svc.is_dry_run(), "summary": summary }))),
-        Err(e) => Err(e.into()),
+        Err(e) => Err(e),
     }
 }

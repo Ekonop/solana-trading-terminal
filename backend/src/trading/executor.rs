@@ -459,7 +459,7 @@ impl Executor {
             snapshot: Some(snap.clone()),
             solusd: marks.solusd,
             executor_slippage_bps: self.cfg.paper_trading.slippage_bps,
-            max_order_notional_usd: rust_decimal::Decimal::from(self.cfg.paper_trading.max_order_notional_usd),
+            max_order_notional_usd: self.cfg.paper_trading.max_order_notional_usd,
         })
     }
 
@@ -584,6 +584,6 @@ trait PositionDecimals {
 }
 impl PositionDecimals for crate::domain::Position {
     fn decimals(&self) -> i32 {
-        9 // simulator convention; refined when real metadata is available
+        self.decimals
     }
 }

@@ -213,12 +213,18 @@ class _OpenPositions extends StatelessWidget {
                 ],
                 rows: [
                   for (final p in positions)
-                    [
-                      SymbolCell(symbol: p.symbol),
-                      Text(p.quantityD.toStringAsFixed(p.quantityD.abs() > 100 ? 0 : 4),
-                          style: Type.data),
-                      DirText.fromJson(p.unrealizedPnlUsd, fontSize: 11, bold: true),
-                    ],
+                    () {
+                      final q = state.markets.cast<MarketQuote?>().firstWhere(
+                            (m) => m?.mint == p.mint,
+                            orElse: () => null,
+                          );
+                      return [
+                        SymbolCell(symbol: p.symbol, network: q?.network),
+                        Text(p.quantityD.toStringAsFixed(p.quantityD.abs() > 100 ? 0 : 4),
+                            style: Type.dataBold),
+                        DirText.fromJson(p.unrealizedPnlUsd, fontSize: 11, bold: true),
+                      ];
+                    }(),
                 ],
               ),
             ],

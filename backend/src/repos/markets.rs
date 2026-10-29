@@ -20,6 +20,7 @@ fn row_to_snapshot(r: &pglite::Row) -> Result<MarketSnapshot, AppError> {
         observed_at: row_i64(r, "observed_at")?,
         received_at: row_i64(r, "received_at")?,
         quality: row_i32(r, "quality")?,
+        network: row_str(r, "network")?,
     })
 }
 
@@ -27,8 +28,8 @@ pub async fn insert_snapshot(db: &impl DbLike, s: &MarketSnapshot) -> Result<(),
     db.query(
         "INSERT INTO market_snapshots
             (id, mint, symbol, name, pair_id, price, liquidity_usd, volume_24h_usd,
-             source, is_simulated, observed_at, received_at, quality)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)",
+             source, is_simulated, observed_at, received_at, quality, network)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)",
         &[
             &s.id,
             &s.mint,
@@ -43,6 +44,7 @@ pub async fn insert_snapshot(db: &impl DbLike, s: &MarketSnapshot) -> Result<(),
             &s.observed_at,
             &s.received_at,
             &s.quality,
+            &s.network,
         ],
     )
     .await

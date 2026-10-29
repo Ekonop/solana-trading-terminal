@@ -113,22 +113,19 @@ impl DexScreenerProvider {
         };
         let mut best: Option<ProviderQuote> = None;
         for p in pairs {
-            // Only accept Solana pairs.
-            if p.chain_id.as_deref() != Some("solana") {
-                continue;
-            }
+            let network = p.chain_id.clone().unwrap_or_else(|| "solana".into());
             let Some(price_str) = p.price_usd else { continue };
             let Ok(price) = price_str.parse::<Decimal>() else { continue };
             if price <= Decimal::ZERO {
                 continue;
             }
             let liqu = p.liquidity.and_then(|l| l.usd).filter(|v| *v >= 0.0);
-            let liq_dec = liqu.and_then(|v| Decimal::from_f64_retain(v));
+            let liq_dec = liqu.and_then(Decimal::from_f64_retain);
             let vol_dec = p
                 .volume
                 .and_then(|v| v.h24)
                 .filter(|v| *v >= 0.0)
-                .and_then(|v| Decimal::from_f64_retain(v));
+                .and_then(Decimal::from_f64_retain);
             let q = ProviderQuote {
                 mint: mint.to_string(),
                 symbol: p.base_token.as_ref().and_then(|t| t.symbol.clone()),
@@ -140,6 +137,7 @@ impl DexScreenerProvider {
                 // DexScreener does not expose token decimals; risk refuses
                 // orders on mints with unknown decimals.
                 decimals: None,
+                network,
                 observed_at: crate::time::now_micros(),
             };
             // Prefer the highest-liquidity pair as the market reference.

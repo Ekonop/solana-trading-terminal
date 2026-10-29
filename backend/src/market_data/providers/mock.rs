@@ -54,6 +54,7 @@ struct DemoToken {
     mint: &'static str,
     symbol: &'static str,
     name: &'static str,
+    network: &'static str,
     decimals: i32,
     base_price: f64,
     amplitude: f64,
@@ -64,15 +65,29 @@ struct DemoToken {
 }
 
 const DEMO_TOKENS: &[DemoToken] = &[
-    DemoToken { mint: SOL_MINT, symbol: "SOL", name: "Solana", decimals: 9, base_price: 148.0, amplitude: 0.05, period_secs: 600.0, phase: 0.0, liquidity_usd: 8_000_000.0, volume_24h_usd: 400_000_000.0 },
-    DemoToken { mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", symbol: "USDC", name: "USD Coin", decimals: 6, base_price: 1.00, amplitude: 0.001, period_secs: 900.0, phase: 1.0, liquidity_usd: 5_000_000.0, volume_24h_usd: 250_000_000.0 },
-    DemoToken { mint: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263", symbol: "BONK", name: "Bonk", decimals: 5, base_price: 0.000029, amplitude: 0.14, period_secs: 180.0, phase: 2.0, liquidity_usd: 1_200_000.0, volume_24h_usd: 18_000_000.0 },
-    DemoToken { mint: "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN", symbol: "JUP", name: "Jupiter", decimals: 6, base_price: 0.92, amplitude: 0.09, period_secs: 240.0, phase: 3.0, liquidity_usd: 2_400_000.0, volume_24h_usd: 35_000_000.0 },
-    DemoToken { mint: "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So", symbol: "mSOL", name: "Marinade Staked SOL", decimals: 9, base_price: 159.0, amplitude: 0.03, period_secs: 420.0, phase: 4.0, liquidity_usd: 900_000.0, volume_24h_usd: 9_000_000.0 },
-    DemoToken { mint: "7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj", symbol: "LST", name: "Liquid Staking Token", decimals: 9, base_price: 154.0, amplitude: 0.06, period_secs: 300.0, phase: 5.0, liquidity_usd: 700_000.0, volume_24h_usd: 6_000_000.0 },
-    // This token only appears after a few ticks — used by the Sniper strategy
-    // to exercise the "newly observed pair" path. Deterministic appearance.
-    DemoToken { mint: "FNxJ4FTPjDhaqYbP9N3wrBoRgixCa6xjnB7YaB1pPB26", symbol: "NEPT", name: "Neptune (demo new pair)", decimals: 9, base_price: 0.004, amplitude: 0.25, period_secs: 45.0, phase: 6.0, liquidity_usd: 60_000.0, volume_24h_usd: 2_100_000.0 },
+    // --- Solana ---
+    DemoToken { mint: SOL_MINT, symbol: "SOL", name: "Solana", network: "solana", decimals: 9, base_price: 148.0, amplitude: 0.05, period_secs: 600.0, phase: 0.0, liquidity_usd: 8_000_000.0, volume_24h_usd: 400_000_000.0 },
+    DemoToken { mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", symbol: "USDC", name: "USD Coin", network: "solana", decimals: 6, base_price: 1.00, amplitude: 0.001, period_secs: 900.0, phase: 1.0, liquidity_usd: 5_000_000.0, volume_24h_usd: 250_000_000.0 },
+    DemoToken { mint: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263", symbol: "BONK", name: "Bonk", network: "solana", decimals: 5, base_price: 0.000029, amplitude: 0.14, period_secs: 180.0, phase: 2.0, liquidity_usd: 1_200_000.0, volume_24h_usd: 18_000_000.0 },
+    DemoToken { mint: "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN", symbol: "JUP", name: "Jupiter", network: "solana", decimals: 6, base_price: 0.92, amplitude: 0.09, period_secs: 240.0, phase: 3.0, liquidity_usd: 2_400_000.0, volume_24h_usd: 35_000_000.0 },
+    DemoToken { mint: "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So", symbol: "mSOL", name: "Marinade Staked SOL", network: "solana", decimals: 9, base_price: 159.0, amplitude: 0.03, period_secs: 420.0, phase: 4.0, liquidity_usd: 900_000.0, volume_24h_usd: 9_000_000.0 },
+    DemoToken { mint: "7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj", symbol: "LST", name: "Liquid Staking Token", network: "solana", decimals: 9, base_price: 154.0, amplitude: 0.06, period_secs: 300.0, phase: 5.0, liquidity_usd: 700_000.0, volume_24h_usd: 6_000_000.0 },
+    DemoToken { mint: "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R", symbol: "RAY", name: "Raydium", network: "solana", decimals: 6, base_price: 2.15, amplitude: 0.12, period_secs: 200.0, phase: 2.5, liquidity_usd: 3_100_000.0, volume_24h_usd: 29_000_000.0 },
+    DemoToken { mint: "FNxJ4FTPjDhaqYbP9N3wrBoRgixCa6xjnB7YaB1pPB26", symbol: "NEPT", name: "Neptune (demo new pair)", network: "solana", decimals: 9, base_price: 0.004, amplitude: 0.25, period_secs: 45.0, phase: 6.0, liquidity_usd: 60_000.0, volume_24h_usd: 2_100_000.0 },
+    // --- Ethereum ---
+    DemoToken { mint: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", symbol: "ETH", name: "Ethereum", network: "ethereum", decimals: 8, base_price: 2540.0, amplitude: 0.04, period_secs: 600.0, phase: 0.5, liquidity_usd: 45_000_000.0, volume_24h_usd: 1_200_000_000.0 },
+    DemoToken { mint: "0x6982508145454ce325ddbe47a25d4ec3d2311933", symbol: "PEPE", name: "Pepe", network: "ethereum", decimals: 6, base_price: 0.0000095, amplitude: 0.18, period_secs: 150.0, phase: 1.5, liquidity_usd: 8_500_000.0, volume_24h_usd: 95_000_000.0 },
+    DemoToken { mint: "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984", symbol: "UNI", name: "Uniswap", network: "ethereum", decimals: 8, base_price: 7.80, amplitude: 0.07, period_secs: 280.0, phase: 2.2, liquidity_usd: 6_200_000.0, volume_24h_usd: 48_000_000.0 },
+    // --- Base ---
+    DemoToken { mint: "0x532f27101965dd16442e59d40670faf5ebb142e4", symbol: "BRETT", name: "Brett", network: "base", decimals: 6, base_price: 0.088, amplitude: 0.16, period_secs: 170.0, phase: 3.1, liquidity_usd: 4_100_000.0, volume_24h_usd: 32_000_000.0 },
+    DemoToken { mint: "0x4ed4e862860bed51a9570b96d89af5e1b0efefed", symbol: "DEGEN", name: "Degen", network: "base", decimals: 6, base_price: 0.0078, amplitude: 0.22, period_secs: 130.0, phase: 4.3, liquidity_usd: 2_800_000.0, volume_24h_usd: 24_000_000.0 },
+    DemoToken { mint: "0x940181a94a35a4569e4529a3cdfb74e38fd98631", symbol: "AERO", name: "Aerodrome", network: "base", decimals: 6, base_price: 1.25, amplitude: 0.11, period_secs: 220.0, phase: 1.8, liquidity_usd: 5_500_000.0, volume_24h_usd: 42_000_000.0 },
+    // --- Arbitrum ---
+    DemoToken { mint: "0x912ce59144191c1204e64559fe8253a0e49e6548", symbol: "ARB", name: "Arbitrum", network: "arbitrum", decimals: 8, base_price: 0.58, amplitude: 0.08, period_secs: 260.0, phase: 2.7, liquidity_usd: 7_000_000.0, volume_24h_usd: 55_000_000.0 },
+    DemoToken { mint: "0xfc5a1a6eb076a2c7ad06ed22c90d7e710e35ad0a", symbol: "GMX", name: "GMX", network: "arbitrum", decimals: 8, base_price: 24.50, amplitude: 0.09, period_secs: 310.0, phase: 3.8, liquidity_usd: 3_200_000.0, volume_24h_usd: 16_000_000.0 },
+    // --- BSC ---
+    DemoToken { mint: "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c", symbol: "BNB", name: "BNB", network: "bsc", decimals: 8, base_price: 585.0, amplitude: 0.04, period_secs: 550.0, phase: 0.8, liquidity_usd: 22_000_000.0, volume_24h_usd: 350_000_000.0 },
+    DemoToken { mint: "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82", symbol: "CAKE", name: "PancakeSwap", network: "bsc", decimals: 8, base_price: 1.82, amplitude: 0.10, period_secs: 240.0, phase: 4.1, liquidity_usd: 4_800_000.0, volume_24h_usd: 28_000_000.0 },
 ];
 
 pub struct MockProvider {
@@ -182,6 +197,7 @@ impl MarketProvider for MockProvider {
                     liquidity_usd: liquidity,
                     volume_24h_usd: volume,
                     decimals: Some(tok.decimals),
+                    network: tok.network.to_string(),
                     observed_at: now,
                 });
             }

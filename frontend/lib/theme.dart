@@ -31,6 +31,24 @@ class T {
 
   static const mono = 'HackMono';
   static const sans = 'FiraSans';
+
+  static Color networkColor(String network) {
+    switch (network.toLowerCase()) {
+      case 'solana':
+        return const Color(0xFFB9A1F0); // soft lavender / purple
+      case 'ethereum':
+        return const Color(0xFFA2B9E8); // soft periwinkle
+      case 'base':
+        return const Color(0xFF70A5F5); // base blue
+      case 'arbitrum':
+        return const Color(0xFF78C3F5); // arbitrum cyan
+      case 'bsc':
+      case 'binance':
+        return const Color(0xFFE6C98F); // bsc soft gold
+      default:
+        return const Color(0xFF9E9AA8);
+    }
+  }
 }
 
 /// DESIGN.md §3 — typography helpers (softened weights/spacing).
