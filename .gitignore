@@ -32,6 +32,11 @@ frontend/*.iml
 ~/stt-exports/
 stt-exports/
 
+# Secrets — never commit
+.env
+.env.local
+*.pem
+
 # OS / editors
 .DS_Store
 *.swp

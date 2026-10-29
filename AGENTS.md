@@ -117,6 +117,18 @@ stt.toml(.example), .env-examples/  config reference
 docs/               ARCHITECTURE, API, DATA_MODEL, STRATEGIES, CONFIG, RESEARCH
 ```
 
+## Secrets (security best practice — Helius & Jupiter docs)
+
+- All keys RPC/Jupiter/wallet are resolved **server-side only**, from process
+  env or a gitignored `.env` (either repo root, or beside the bundle).
+  `backend/src/secrets.rs` is the single source: `ResolvedSecrets`, `Secret`
+  (redacts itself in Debug/Display), `load_dotenv_if_present()`.
+- Never set keys in the committed `stt.toml`; the client never receives them;
+  no API endpoint returns them; logs show only `<redacted>`.
+- `scripts/run-backend.sh` and the bundle `run.sh` both `source .env` if
+  present; the packager strips `.env /*.pem` from the tarball.
+- `.env` / `.env.local` / `*.pem` are gitignored; verify before commit.
+
 ## Speed of iteration
 
 - Backend boot ~12–16s; `/tmp` tmpfs is 14G (keep <13G or Flutter SIGABRTs).

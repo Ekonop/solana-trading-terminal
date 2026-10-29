@@ -3,7 +3,13 @@ use solana_trading_terminal::{config::Config, observability, AppError};
 #[tokio::main]
 async fn main() {
     observability::init();
-    dotenvy::dotenv().ok();
+    // Load server-side secrets from a gitignored `.env` (if present) BEFORE
+    // config resolution, so STT_REAL_* overrides come from there. Secrets are
+    // resolved exclusively server-side and never exposed to the client.
+    let _ = solana_trading_terminal::secrets::load_dotenv_if_present().map_err(|e| {
+        tracing::warn!(error = %e, "optional .env load failed; continuing with process env");
+    });
+    let _ = dotenvy::dotenv().ok();
 
     let cfg = match Config::load() {
         Ok(c) => c,

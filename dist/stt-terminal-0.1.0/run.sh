@@ -7,6 +7,14 @@ set -u
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"                      # relative config/data paths resolve here
 
+# Load server-side secrets from a gitignored .env beside the bundle (if the
+# operator placed one here). Never committed; never echoed. This populates
+# the same STT_REAL_* env the backend reads, so RPC/Jupiter/wallet keys are
+# resolved strictly server-side.
+if [[ -f "$ROOT/.env" ]]; then
+  set -a; source "$ROOT/.env"; set +a
+fi
+
 # Point the backend at the bundle config (env var; no auto-discovery).
 export STT_CONFIG="$ROOT/stt.toml"
 

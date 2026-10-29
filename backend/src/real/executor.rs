@@ -15,6 +15,7 @@ use crate::real::reconcile::Reconciler;
 use crate::real::rpc::SolanaRpc;
 use crate::real::wallet::Wallet;
 use crate::real::RealService;
+use crate::secrets::{ResolvedSecrets, Secret};
 use rust_decimal::prelude::ToPrimitive;
 
 /// A validated real order ready for quote + (possibly) broadcast.
@@ -107,8 +108,15 @@ impl RealExecutor {
             return Err(AppError::Real(format!("killed: {reason}")));
         }
 
+        // Secrets resolve from env / gitignored .env (server-side only). The
+        // RPC URL may be overridden by STT_REAL_RPC_URL; Jupiter key comes from
+        // secrets.rs and is never logged.
+        let sec = ResolvedSecrets::load(&self.cfg.rpc_url)?;
+        let rpc_url = sec.rpc_url.clone().unwrap_or_else(|| self.cfg.rpc_url.clone());
+        let jup_key = sec.jupiter_api_key.as_ref().map(Secret::as_str).unwrap_or("");
+
         // Chain is source of truth: refresh balance via reconcile.
-        let balance = Reconciler::new(self.cfg.rpc_url.clone())
+        let balance = Reconciler::new(rpc_url.clone())
             .chain_balance(&wallet.address())
             .await?;
         self.svc.set_chain_balance(balance);
@@ -127,7 +135,8 @@ impl RealExecutor {
         let (input_lamports, intended_usd) = size_order_usd(&self.cfg, balance)?;
 
         // P4: quote (input = SOL mint -> USDC mint swap, or a stables pair).
-        let jup = crate::real::jupiter::Jupiter::new(&self.cfg.jupiter_base_url, &self.cfg.jupiter_api_key);
+        // Jupiter key comes from server-side secrets (redacted if logged).
+        let jup = crate::real::jupiter::Jupiter::new(&self.cfg.jupiter_base_url, jup_key);
         let quote = jup
             .quote(&self.cfg.sol_mint, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", input_lamports, &wallet.address())
             .await;

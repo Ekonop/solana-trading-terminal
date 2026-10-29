@@ -4,6 +4,16 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+# Load server-side secrets from a gitignored .env (if present) so the same
+# process env that the backend reads is populated here. Secrets are never
+# emitted; only presence is checked.
+if [[ -f .env ]]; then
+  set -a; source .env; set +a
+  echo "==> loaded secrets from .env"
+else
+  echo "==> no .env found; using process environment only"
+fi
+
 CONFIG="${STT_CONFIG:-stt.toml}"
 if [[ ! -f "$CONFIG" ]]; then
   echo "==> no $CONFIG found; creating from example"

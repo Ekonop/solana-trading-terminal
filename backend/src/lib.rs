@@ -8,6 +8,7 @@ pub mod domain;
 pub mod errors;
 pub mod ids;
 pub mod time;
+pub mod secrets;
 
 pub mod api;
 pub mod app;

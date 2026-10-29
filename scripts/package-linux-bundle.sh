@@ -87,6 +87,14 @@ set -u
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"                      # relative config/data paths resolve here
 
+# Load server-side secrets from a gitignored .env beside the bundle (if the
+# operator placed one here). Never committed; never echoed. This populates
+# the same STT_REAL_* env the backend reads, so RPC/Jupiter/wallet keys are
+# resolved strictly server-side.
+if [[ -f "$ROOT/.env" ]]; then
+  set -a; source "$ROOT/.env"; set +a
+fi
+
 # Point the backend at the bundle config (env var; no auto-discovery).
 export STT_CONFIG="$ROOT/stt.toml"
 
@@ -174,6 +182,11 @@ Trading stays paper. No network → close the app as-is (demo mode).
 MD
 
 echo "==> packaging $TARBALL"
+# Defense-in-depth: never let a .env or secret file ship inside the tarball.
+find "$OUT" -maxdepth 2 -name '.env' -o -maxdepth 2 -name '*.pem' | while read -r f; do
+  rm -f "$f"
+  echo "  (removed secret-adjacent file from bundle: $f)"
+done
 tar -czf "$TARBALL" -C "$ROOT/dist" "stt-terminal-$VER"
 echo "==> done:"
 du -sh "$OUT" "$TARBALL"
